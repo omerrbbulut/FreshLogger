@@ -161,13 +161,43 @@ private:
         // File sink setup
         if (!config.logFilePath.empty()) {
             try {
-                // Ensure directory exists
+                // Suppress spdlog file rotation errors by setting environment variable
+                setenv("SPDLOG_LEVEL", "warn", 1);
+                
+                // Ensure directory exists and is writable
                 std::filesystem::path logPath(config.logFilePath);
                 auto logDir = logPath.parent_path();
-                if (!logDir.empty() && !std::filesystem::exists(logDir)) {
-                    std::filesystem::create_directories(logDir);
+                
+                if (!logDir.empty()) {
+                    // Create directory if it doesn't exist
+                    if (!std::filesystem::exists(logDir)) {
+                        std::filesystem::create_directories(logDir);
+                    }
+                    
+                    // Test write permissions with a temporary file
+                    auto testFile = logDir / ".test_write_permissions";
+                    try {
+                        std::ofstream testStream(testFile);
+                        if (testStream.is_open()) {
+                            testStream << "test" << std::endl;
+                            testStream.close();
+                            std::filesystem::remove(testFile);
+                        } else {
+                            throw std::runtime_error("Cannot create test file in log directory");
+                        }
+                    } catch (const std::exception& ex) {
+                        std::cerr << "Warning: Log directory not writable: " << logDir << " - " << ex.what() << std::endl;
+                        // Fall back to console only
+                        if (sinks.empty()) {
+                            auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+                            console_sink->set_level(convertLevel(config.minLevel));
+                            sinks.push_back(console_sink);
+                        }
+                        return; // Skip file sink creation
+                    }
                 }
                 
+                // Create rotating file sink with custom error handling
                 auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
                     config.logFilePath, 
                     config.maxFileSize, 
@@ -175,31 +205,8 @@ private:
                 );
                 file_sink->set_level(convertLevel(config.minLevel));
                 
-                // If safe file rotation is enabled, ensure directory exists and handle rotation gracefully
-                if (config.safeFileRotation) {
-                    // Ensure the log directory exists and is writable
-                    std::filesystem::path logPath(config.logFilePath);
-                    auto logDir = logPath.parent_path();
-                    if (!logDir.empty()) {
-                        try {
-                            if (!std::filesystem::exists(logDir)) {
-                                std::filesystem::create_directories(logDir);
-                            }
-                            // Test write permissions
-                            auto testFile = logDir / ".test_write";
-                            std::ofstream testStream(testFile);
-                            if (testStream.is_open()) {
-                                testStream.close();
-                                std::filesystem::remove(testFile);
-                            }
-                        } catch (const std::exception& ex) {
-                            // If directory creation fails, fall back to console
-                            std::cerr << "Warning: Could not ensure log directory safety: " << ex.what() << std::endl;
-                        }
-                    }
-                }
-                
                 sinks.push_back(file_sink);
+                
             } catch (const std::exception& ex) {
                 // Fallback to console if file creation fails
                 std::cerr << "Warning: Could not create log file: " << config.logFilePath 
