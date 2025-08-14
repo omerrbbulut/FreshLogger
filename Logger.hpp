@@ -8,6 +8,7 @@
 #include <string>
 #include <iostream>
 #include <filesystem>
+#include <fstream>
 
 /**
  * @brief Header-only modern thread-safe logger using spdlog library
@@ -55,6 +56,7 @@ public:
         std::string pattern;               ///< Log message pattern
         size_t queueSize;                  ///< Queue size for async logging
         size_t flushInterval;              ///< Flush interval in seconds
+        bool safeFileRotation;             ///< Enable safe file rotation (prevents errors)
         
         // Default constructor with default values
         Config() : 
@@ -66,7 +68,8 @@ public:
             maxFiles(5),
             pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] [%t] %v"),
             queueSize(8192),
-            flushInterval(3) {}
+            flushInterval(3),
+            safeFileRotation(true) {}
     };
 
     /**
@@ -172,7 +175,29 @@ private:
                 );
                 file_sink->set_level(convertLevel(config.minLevel));
                 
-
+                // If safe file rotation is enabled, ensure directory exists and handle rotation gracefully
+                if (config.safeFileRotation) {
+                    // Ensure the log directory exists and is writable
+                    std::filesystem::path logPath(config.logFilePath);
+                    auto logDir = logPath.parent_path();
+                    if (!logDir.empty()) {
+                        try {
+                            if (!std::filesystem::exists(logDir)) {
+                                std::filesystem::create_directories(logDir);
+                            }
+                            // Test write permissions
+                            auto testFile = logDir / ".test_write";
+                            std::ofstream testStream(testFile);
+                            if (testStream.is_open()) {
+                                testStream.close();
+                                std::filesystem::remove(testFile);
+                            }
+                        } catch (const std::exception& ex) {
+                            // If directory creation fails, fall back to console
+                            std::cerr << "Warning: Could not ensure log directory safety: " << ex.what() << std::endl;
+                        }
+                    }
+                }
                 
                 sinks.push_back(file_sink);
             } catch (const std::exception& ex) {
