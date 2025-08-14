@@ -100,12 +100,20 @@ make
 # All tests
 make enterprise-test
 
-# Specific test categories
-./unit_tests
-./simple_tests
-./performance_tests
-./stress_tests
+# Individual test suites
+make simple_tests && ./simple_tests
+make unit_tests && ./unit_tests
+make performance_tests && ./performance_tests
+make stress_tests && ./stress_tests
+
+# Stress tests with verbose output (for debugging)
+STRESS_TEST_VERBOSE=1 make stress_tests && ./stress_tests
 ```
+
+### Test Output Control
+- **Default**: Clean output for CI/CD
+- **Verbose**: Set `STRESS_TEST_VERBOSE=1` for detailed progress
+- **CI/CD**: Automatic clean output for GitHub Actions
 
 ## ⚙️ Configuration
 

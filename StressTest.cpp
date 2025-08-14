@@ -206,8 +206,13 @@ TEST_F(StressTest, ExtremeLoadTest) {
         int lastCount = 0;
         auto lastTime = std::chrono::high_resolution_clock::now();
         
-        // Show initial progress immediately
-        std::cout << "Progress: 0/" << EXTREME_MESSAGE_COUNT << " (0%) Rate: 0 msg/sec" << std::endl;
+        // Check if verbose output is enabled (default: false for CI/CD)
+        bool verboseOutput = (std::getenv("STRESS_TEST_VERBOSE") != nullptr);
+        
+        // Show initial progress only if verbose
+        if (verboseOutput) {
+            std::cout << "Progress: 0/" << EXTREME_MESSAGE_COUNT << " (0%) Rate: 0 msg/sec" << std::endl;
+        }
         
         while (!shouldStop && successCount.load() < EXTREME_MESSAGE_COUNT) {
             std::this_thread::sleep_for(std::chrono::seconds(3)); // Reduced from 5 to 3 seconds
@@ -219,9 +224,13 @@ TEST_F(StressTest, ExtremeLoadTest) {
             if (duration.count() > 0) {
                 double rate = (currentCount - lastCount) / duration.count();
                 double percentage = (currentCount * 100.0 / EXTREME_MESSAGE_COUNT);
-                std::cout << "Progress: " << currentCount << "/" << EXTREME_MESSAGE_COUNT 
-                          << " (" << std::fixed << std::setprecision(1) << percentage << "%) "
-                          << "Rate: " << std::fixed << std::setprecision(0) << rate << " msg/sec" << std::endl;
+                
+                // Only show progress if verbose mode is enabled
+                if (verboseOutput) {
+                    std::cout << "Progress: " << currentCount << "/" << EXTREME_MESSAGE_COUNT 
+                              << " (" << std::fixed << std::setprecision(1) << percentage << "%) "
+                              << "Rate: " << std::fixed << std::setprecision(0) << rate << " msg/sec" << std::endl;
+                }
             }
             
             lastCount = currentCount;
@@ -471,8 +480,13 @@ TEST_F(StressTest, LongRunningStabilityTest) {
         int lastCount = 0;
         auto lastTime = std::chrono::high_resolution_clock::now();
         
-        // Show initial progress immediately
-        std::cout << "Stability Progress: 0/" << STABILITY_TEST_DURATION << "s - Messages: 0 - Rate: 0 msg/sec" << std::endl;
+        // Check if verbose output is enabled (default: false for CI/CD)
+        bool verboseOutput = (std::getenv("STRESS_TEST_VERBOSE") != nullptr);
+        
+        // Show initial progress only if verbose
+        if (verboseOutput) {
+            std::cout << "Stability Progress: 0/" << STABILITY_TEST_DURATION << "s - Messages: 0 - Rate: 0 msg/sec" << std::endl;
+        }
         
         while (!shouldStop) {
             std::this_thread::sleep_for(std::chrono::seconds(15)); // Reduced from 30 to 15 seconds
@@ -489,9 +503,13 @@ TEST_F(StressTest, LongRunningStabilityTest) {
             
             if (duration.count() > 0) {
                 double rate = (currentCount - lastCount) / duration.count();
-                std::cout << "Stability Progress: " << elapsed.count() << "/" << STABILITY_TEST_DURATION 
-                          << "s - Messages: " << currentCount << " - Rate: " 
-                          << std::fixed << std::setprecision(0) << rate << " msg/sec" << std::endl;
+                
+                // Only show progress if verbose mode is enabled
+                if (verboseOutput) {
+                    std::cout << "Stability Progress: " << elapsed.count() << "/" << STABILITY_TEST_DURATION 
+                              << "s - Messages: " << currentCount << " - Rate: " 
+                              << std::fixed << std::setprecision(0) << rate << " msg/sec" << std::endl;
+                }
             }
             
             lastCount = currentCount;
