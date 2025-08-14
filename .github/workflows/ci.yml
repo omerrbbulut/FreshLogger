@@ -21,10 +21,21 @@ jobs:
     - uses: actions/checkout@v4
     
     - name: Setup C++ Environment
-      uses: actions/setup-cpp@v1
-      with:
-        compiler: ${{ matrix.compiler }}
-        cxx_std: ${{ matrix.cxx_std }}
+      run: |
+        if [ "${{ matrix.compiler }}" = "gcc-11" ]; then
+          sudo apt-get update
+          sudo apt-get install -y gcc-11 g++-11
+          echo "CC=gcc-11" >> $GITHUB_ENV
+          echo "CXX=g++-11" >> $GITHUB_ENV
+        elif [ "${{ matrix.compiler }}" = "clang-14" ]; then
+          sudo apt-get update
+          sudo apt-get install -y clang-14
+          echo "CC=clang-14" >> $GITHUB_ENV
+          echo "CXX=clang++-14" >> $GITHUB_ENV
+        fi
+        
+        echo "CXX_STD=${{ matrix.cxx_std }}" >> $GITHUB_ENV
+        echo "Using compiler: ${{ matrix.compiler }} with C++${{ matrix.cxx_std }}"
     
     - name: Install Dependencies
       run: |
@@ -42,6 +53,7 @@ jobs:
     - name: Build and Test
       run: |
         echo "Building with ${{ matrix.compiler }} and C++${{ matrix.cxx_std }}"
+        export CXXFLAGS="-std=c++${{ matrix.cxx_std }} -Wall -Wextra -O2 -g"
         make clean || true
         make all
         echo "Build completed successfully"
@@ -60,7 +72,7 @@ jobs:
         timeout 60s ./edge_case_tests || echo "Edge case tests failed or timed out but continuing"
     
     - name: Upload Test Results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: test-results-${{ matrix.compiler }}-${{ matrix.cxx_std }}
@@ -81,10 +93,12 @@ jobs:
     - uses: actions/checkout@v4
     
     - name: Setup C++ Environment
-      uses: actions/setup-cpp@v1
-      with:
-        compiler: gcc-11
-        cxx_std: 17
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc-11 g++-11
+        echo "CC=gcc-11" >> $GITHUB_ENV
+        echo "CXX=g++-11" >> $GITHUB_ENV
+        echo "CXX_STD=17" >> $GITHUB_ENV
     
     - name: Install Dependencies
       run: |
@@ -95,6 +109,7 @@ jobs:
     
     - name: Build Release
       run: |
+        export CXXFLAGS="-std=c++17 -Wall -Wextra -O2 -g"
         make clean || true
         make all
         echo "Release build completed"
