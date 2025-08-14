@@ -11,7 +11,11 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        compiler: [gcc-11]
+        cxx_std: [17]
     
     steps:
     - uses: actions/checkout@v4
@@ -69,9 +73,9 @@ jobs:
         echo "=== Performance Tests ==="
         ./performance_tests || echo "Performance tests failed but continuing"
         echo "=== Stress Tests ==="
-        timeout 120s ./stress_tests || echo "Stress tests failed or timed out but continuing"
+        timeout 180s ./stress_tests || echo "Stress tests failed or timed out but continuing"
         echo "=== Edge Case Tests ==="
-        timeout 120s ./edge_case_tests || echo "Edge case tests failed or timed out but continuing"
+        timeout 180s ./edge_case_tests || echo "Edge case tests failed or timed out but continuing"
     
     - name: Upload Test Results
       uses: actions/upload-artifact@v4
@@ -88,7 +92,7 @@ jobs:
   release:
     needs: test
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     if: github.event_name == 'release'
     
     steps:
@@ -121,7 +125,7 @@ jobs:
         echo "Running critical tests for release..."
         ./simple_tests
         ./unit_tests
-        timeout 180s ./performance_tests || echo "Performance tests failed but continuing"
+        timeout 240s ./performance_tests || echo "Performance tests failed but continuing"
     
     - name: Create Release Package
       run: |

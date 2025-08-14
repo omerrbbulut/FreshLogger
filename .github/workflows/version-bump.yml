@@ -27,8 +27,8 @@ jobs:
     - name: Check for Version Changes
       id: version-check
       run: |
-        # Extract current version from Logger.hpp
-        CURRENT_VERSION=$(grep -o 'VERSION.*[0-9]\+\.[0-9]\+\.[0-9]\+' Logger.hpp | head -1 | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+' || echo "1.0.0")
+        # Extract current version from Logger.hpp comment
+        CURRENT_VERSION=$(grep -o 'Version:.*[0-9]\+\.[0-9]\+\.[0-9]\+' Logger.hpp | head -1 | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+' || echo "1.0.0")
         echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
         
         # Check if this is a new commit
@@ -52,8 +52,8 @@ jobs:
         
         echo "Bumping version from $CURRENT_VERSION to $NEW_VERSION"
         
-        # Update Logger.hpp
-        sed -i "s/VERSION.*[0-9]\+\.[0-9]\+\.[0-9]\+/VERSION $NEW_VERSION/" Logger.hpp
+        # Update Logger.hpp comment
+        sed -i "s/Version:.*[0-9]\+\.[0-9]\+\.[0-9]\+/Version: $NEW_VERSION/" Logger.hpp
         
         # Update README.md if version is mentioned
         sed -i "s/Version:.*[0-9]\+\.[0-9]\+\.[0-9]\+/Version: $NEW_VERSION/" README.md

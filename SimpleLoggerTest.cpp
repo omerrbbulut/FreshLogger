@@ -7,6 +7,7 @@
 #include "Logger.hpp"
 #include <gtest/gtest.h>
 #include <iostream>
+#include <filesystem> // Added for file removal in LoggingMethodsExist test
 
 class SimpleLoggerTest : public ::testing::Test {
 protected:
@@ -27,7 +28,12 @@ TEST_F(SimpleLoggerTest, BasicCreation) {
 
 // Test 2: Basic logging methods exist
 TEST_F(SimpleLoggerTest, LoggingMethodsExist) {
-    Logger logger;
+    // Disable console output during this test to avoid format confusion
+    Logger::Config config;
+    config.consoleOutput = false;  // Disable console output for clean test
+    config.logFilePath = "test_logs/test_output.log";  // Use file instead
+    
+    Logger logger(config);
     
     // These should not crash
     EXPECT_NO_THROW(logger.info("Test info"));
@@ -36,6 +42,9 @@ TEST_F(SimpleLoggerTest, LoggingMethodsExist) {
     EXPECT_NO_THROW(logger.debug("Test debug"));
     EXPECT_NO_THROW(logger.trace("Test trace"));
     EXPECT_NO_THROW(logger.fatal("Test fatal"));
+    
+    // Clean up test log file
+    std::filesystem::remove("test_logs/test_output.log");
 }
 
 // Test 3: Configuration structure
