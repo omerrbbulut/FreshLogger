@@ -32,15 +32,20 @@
 namespace {
     struct SpdlogErrorHandlerInitializer {
         SpdlogErrorHandlerInitializer() {
-            // Set spdlog to be completely silent about file rotation issues
-            spdlog::set_error_handler([](const std::string& msg) {
-                // Suppress ALL spdlog errors to avoid CI/CD noise
-                // This is intentional for production stability
-            });
-            
-            // Set global log level to critical only
-            spdlog::set_level(spdlog::level::critical);
+            try {
+                // Set spdlog to be completely silent about file rotation issues
+                spdlog::set_error_handler([](const std::string&) {
+                    // Suppress ALL spdlog errors to avoid CI/CD noise
+                    // This is intentional for production stability
+                });
+                
+                // Set global log level to critical only
+                spdlog::set_level(spdlog::level::critical);
+            } catch (...) {
+                // Ignore any initialization errors
+            }
         }
+        
     };
     
     // Static instance to ensure error handler is set before any logger creation
@@ -74,7 +79,6 @@ public:
         std::string pattern;               ///< Log message pattern
         size_t queueSize;                  ///< Queue size for async logging
         size_t flushInterval;              ///< Flush interval in seconds
-        bool safeFileRotation;             ///< Enable safe file rotation (prevents errors)
         
         // Default constructor with default values
         Config() : 
@@ -86,8 +90,7 @@ public:
             maxFiles(5),
             pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] [%t] %v"),
             queueSize(8192),
-            flushInterval(3),
-            safeFileRotation(true) {}
+            flushInterval(3) {}
     };
 
     /**
@@ -179,14 +182,15 @@ private:
         // File sink setup
         if (!config.logFilePath.empty()) {
             try {
-                // Suppress spdlog file rotation errors by setting environment variables
-                setenv("SPDLOG_LEVEL", "error", 1);  // Only show errors, not warnings
-                setenv("SPDLOG_ERROR_LEVEL", "critical", 1);  // Only show critical errors
-                
                 // Temporarily redirect stderr to suppress file rotation errors
                 std::stringstream buffer;
-                std::streambuf* old_stderr = std::cerr.rdbuf();
-                std::cerr.rdbuf(buffer.rdbuf());
+                struct StderrRedirectGuard {
+                    std::ostream& stream;
+                    std::streambuf* old;
+                    explicit StderrRedirectGuard(std::ostream& s, std::streambuf* nb)
+                        : stream(s), old(s.rdbuf(nb)) {}
+                    ~StderrRedirectGuard() { stream.rdbuf(old); }
+                } guard(std::cerr, buffer.rdbuf());
                 
                 // Ensure directory exists and is writable
                 std::filesystem::path logPath(config.logFilePath);
@@ -210,8 +214,7 @@ private:
                             throw std::runtime_error("Cannot create test file in log directory");
                         }
                     } catch (const std::exception& ex) {
-                        // Restore stderr before printing warning
-                        std::cerr.rdbuf(old_stderr);
+                        // stderr will be restored by guard destructor
                         std::cerr << "Warning: Log directory not writable: " << logDir << " - " << ex.what() << std::endl;
                         // Fall back to console only
                         if (sinks.empty()) {
@@ -233,8 +236,7 @@ private:
                 
                 sinks.push_back(file_sink);
                 
-                // Restore stderr after file sink creation
-                std::cerr.rdbuf(old_stderr);
+                // stderr will be restored automatically when guard goes out of scope
                 
             } catch (const std::exception& ex) {
                 // Fallback to console if file creation fails
@@ -306,17 +308,7 @@ private:
         }
     }
     
-    LogLevel convertLevel(spdlog::level::level_enum level) const {
-        switch (level) {
-            case spdlog::level::trace:   return LogLevel::TRACE;
-            case spdlog::level::debug:   return LogLevel::DEBUG;
-            case spdlog::level::info:    return LogLevel::INFO;
-            case spdlog::level::warn:    return LogLevel::WARNING;
-            case spdlog::level::err:     return LogLevel::ERROR;
-            case spdlog::level::critical: return LogLevel::FATAL;
-            default:                      return LogLevel::INFO;
-        }
-    }
+
     
     std::shared_ptr<spdlog::logger> m_logger;  ///< Underlying spdlog logger instance
     Config m_config;                           ///< Current logger configuration

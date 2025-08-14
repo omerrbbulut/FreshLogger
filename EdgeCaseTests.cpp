@@ -38,6 +38,7 @@ TEST_F(EdgeCaseTest, ExtremelyLongMessages) {
     Logger::Config config;
     config.logFilePath = "edge_test_logs/long_messages.log";
     config.asyncLogging = false;
+    config.consoleOutput = false;
     
     Logger logger(config);
     
@@ -58,6 +59,7 @@ TEST_F(EdgeCaseTest, EmptyMessages) {
     Logger::Config config;
     config.logFilePath = "edge_test_logs/empty_messages.log";
     config.asyncLogging = false;
+    config.consoleOutput = false;
     
     Logger logger(config);
     
@@ -76,6 +78,7 @@ TEST_F(EdgeCaseTest, SpecialCharacters) {
     Logger::Config config;
     config.logFilePath = "edge_test_logs/special_chars.log";
     config.asyncLogging = false;
+    config.consoleOutput = false;
     
     Logger logger(config);
     
@@ -95,6 +98,7 @@ TEST_F(EdgeCaseTest, UnicodeCharacters) {
     Logger::Config config;
     config.logFilePath = "edge_test_logs/unicode.log";
     config.asyncLogging = false;
+    config.consoleOutput = false;
     
     Logger logger(config);
     
@@ -115,6 +119,7 @@ TEST_F(EdgeCaseTest, VeryHighFrequencyLogging) {
     config.logFilePath = "edge_test_logs/high_freq.log";
     config.asyncLogging = true;
     config.queueSize = 100000; // Large queue
+    config.consoleOutput = false;
     
     Logger logger(config);
     
@@ -144,6 +149,7 @@ TEST_F(EdgeCaseTest, ConfigurationEdgeCases) {
     config.maxFileSize = 100; // 100 bytes - very small
     config.maxFiles = 1; // Only 1 file
     config.asyncLogging = false;
+    config.consoleOutput = false;
     
     Logger logger(config);
     
@@ -162,6 +168,7 @@ TEST_F(EdgeCaseTest, MemoryBoundaryConditions) {
     Logger::Config config;
     config.logFilePath = "edge_test_logs/memory_test.log";
     config.asyncLogging = false;
+    config.consoleOutput = false;
     
     Logger logger(config);
     
@@ -190,6 +197,7 @@ TEST_F(EdgeCaseTest, ExtremeThreadSafety) {
     config.logFilePath = "edge_test_logs/extreme_threads.log";
     config.asyncLogging = true;
     config.queueSize = 50000;
+    config.consoleOutput = false;
     
     Logger logger(config);
     
@@ -246,6 +254,7 @@ TEST_F(EdgeCaseTest, FileSystemEdgeCases) {
     Logger::Config config;
     config.logFilePath = longPath;
     config.asyncLogging = false;
+    config.consoleOutput = false;
     
     Logger logger(config);
     
@@ -262,6 +271,7 @@ TEST_F(EdgeCaseTest, PerformanceUnderMemoryPressure) {
     config.logFilePath = "edge_test_logs/memory_pressure.log";
     config.asyncLogging = true;
     config.queueSize = 1000; // Smaller queue to create pressure
+    config.consoleOutput = false;
     
     Logger logger(config);
     
