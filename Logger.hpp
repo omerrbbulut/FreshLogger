@@ -172,10 +172,7 @@ private:
                 );
                 file_sink->set_level(convertLevel(config.minLevel));
                 
-                // Set error handler for file rotation issues
-                file_sink->set_error_handler([](const std::string& msg) {
-                    // Silently handle rotation errors to avoid CI noise
-                });
+
                 
                 sinks.push_back(file_sink);
             } catch (const std::exception& ex) {
