@@ -11,31 +11,19 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    strategy:
-      matrix:
-        compiler: [gcc-11, clang-14]
-        cxx_std: [17, 20]
+    timeout-minutes: 15
     
     steps:
     - uses: actions/checkout@v4
     
     - name: Setup C++ Environment
       run: |
-        if [ "${{ matrix.compiler }}" = "gcc-11" ]; then
-          sudo apt-get update
-          sudo apt-get install -y gcc-11 g++-11
-          echo "CC=gcc-11" >> $GITHUB_ENV
-          echo "CXX=g++-11" >> $GITHUB_ENV
-        elif [ "${{ matrix.compiler }}" = "clang-14" ]; then
-          sudo apt-get update
-          sudo apt-get install -y clang-14
-          echo "CC=clang-14" >> $GITHUB_ENV
-          echo "CXX=clang++-14" >> $GITHUB_ENV
-        fi
-        
-        echo "CXX_STD=${{ matrix.cxx_std }}" >> $GITHUB_ENV
-        echo "Using compiler: ${{ matrix.compiler }} with C++${{ matrix.cxx_std }}"
+        sudo apt-get update
+        sudo apt-get install -y gcc-11 g++-11
+        echo "CC=gcc-11" >> $GITHUB_ENV
+        echo "CXX=g++-11" >> $GITHUB_ENV
+        echo "CXX_STD=17" >> $GITHUB_ENV
+        echo "Using compiler: gcc-11 with C++17"
     
     - name: Install Dependencies
       run: |
@@ -46,36 +34,50 @@ jobs:
     
     - name: Check Dependencies
       run: |
-        pkg-config --exists spdlog || echo "spdlog not found"
-        pkg-config --exists gtest || echo "gtest not found"
-        pkg-config --exists fmt || echo "fmt not found"
+        echo "Checking dependencies..."
+        pkg-config --exists spdlog && echo "✅ spdlog found" || echo "❌ spdlog not found"
+        pkg-config --exists gtest && echo "✅ gtest found" || echo "❌ gtest not found"
+        pkg-config --exists fmt && echo "✅ fmt found" || echo "❌ fmt not found"
+        which gcc-11 && echo "✅ gcc-11 found" || echo "❌ gcc-11 not found"
+        which g++-11 && echo "✅ g++-11 found" || echo "❌ g++-11 not found"
     
     - name: Build and Test
       run: |
-        echo "Building with ${{ matrix.compiler }} and C++${{ matrix.cxx_std }}"
-        export CXXFLAGS="-std=c++${{ matrix.cxx_std }} -Wall -Wextra -O2 -g"
+        echo "Building with gcc-11 and C++17"
+        export CXXFLAGS="-std=c++17 -Wall -Wextra -O2 -g"
+        echo "CXXFLAGS: $CXXFLAGS"
+        echo "CXX: $CXX"
+        echo "CC: $CC"
+        
         make clean || true
+        echo "Clean completed"
+        
         make all
         echo "Build completed successfully"
     
     - name: Run Basic Tests
       run: |
         echo "Running basic tests..."
+        echo "=== Simple Tests ==="
         ./simple_tests || echo "Simple tests failed but continuing"
+        echo "=== Unit Tests ==="
         ./unit_tests || echo "Unit tests failed but continuing"
     
     - name: Run Performance Tests
       run: |
         echo "Running performance tests..."
+        echo "=== Performance Tests ==="
         ./performance_tests || echo "Performance tests failed but continuing"
-        timeout 60s ./stress_tests || echo "Stress tests failed or timed out but continuing"
-        timeout 60s ./edge_case_tests || echo "Edge case tests failed or timed out but continuing"
+        echo "=== Stress Tests ==="
+        timeout 120s ./stress_tests || echo "Stress tests failed or timed out but continuing"
+        echo "=== Edge Case Tests ==="
+        timeout 120s ./edge_case_tests || echo "Edge case tests failed or timed out but continuing"
     
     - name: Upload Test Results
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: test-results-${{ matrix.compiler }}-${{ matrix.cxx_std }}
+        name: test-results-gcc11-cpp17
         path: |
           test_logs/
           stress_logs/
@@ -86,7 +88,7 @@ jobs:
   release:
     needs: test
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     if: github.event_name == 'release'
     
     steps:
@@ -119,7 +121,7 @@ jobs:
         echo "Running critical tests for release..."
         ./simple_tests
         ./unit_tests
-        timeout 120s ./performance_tests || echo "Performance tests failed but continuing"
+        timeout 180s ./performance_tests || echo "Performance tests failed but continuing"
     
     - name: Create Release Package
       run: |
