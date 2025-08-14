@@ -1,0 +1,99 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [ published ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler: [gcc-11, clang-14]
+        cxx_std: [17, 20]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup C++ Environment
+      uses: actions/setup-cpp@v1
+      with:
+        compiler: ${{ matrix.compiler }}
+        cxx_std: ${{ matrix.cxx_std }}
+    
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgtest-dev libspdlog-dev libfmt-dev
+    
+    - name: Build and Test
+      run: |
+        make clean
+        make all
+        make enterprise-test
+    
+    - name: Run Performance Tests
+      run: |
+        ./performance_tests
+        ./stress_tests
+        ./edge_case_tests
+    
+    - name: Upload Test Results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results-${{ matrix.compiler }}-${{ matrix.cxx_std }}
+        path: |
+          test_logs/
+          stress_logs/
+          edge_test_logs/
+          *.log
+
+  release:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup C++ Environment
+      uses: actions/setup-cpp@v1
+      with:
+        compiler: gcc-11
+        cxx_std: 17
+    
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgtest-dev libspdlog-dev libfmt-dev
+    
+    - name: Build Release
+      run: |
+        make clean
+        make all
+        make enterprise-test
+    
+    - name: Create Release Package
+      run: |
+        mkdir -p release
+        cp Logger.hpp release/
+        cp README.md release/
+        cp LICENSE release/
+        cp example.cpp release/
+        cp -r docs/ release/ 2>/dev/null || true
+        tar -czf FreshLogger-${{ github.event.release.tag_name }}.tar.gz release/
+    
+    - name: Upload Release Assets
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./FreshLogger-${{ github.event.release.tag_name }}.tar.gz
+        asset_name: FreshLogger-${{ github.event.release.tag_name }}.tar.gz
+        asset_content_type: application/gzip 

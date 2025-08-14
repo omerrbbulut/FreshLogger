@@ -1,0 +1,66 @@
+name: Auto Version Bump
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'Logger.hpp'
+      - 'CMakeLists.txt'
+      - 'Makefile'
+
+jobs:
+  version-bump:
+    runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Setup Git
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+    
+    - name: Check for Version Changes
+      id: version-check
+      run: |
+        # Extract current version from Logger.hpp
+        CURRENT_VERSION=$(grep -o 'VERSION.*[0-9]\+\.[0-9]\+\.[0-9]\+' Logger.hpp | head -1 | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+' || echo "1.0.0")
+        echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+        
+        # Check if this is a new commit
+        if [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+          echo "is_new_commit=true" >> $GITHUB_OUTPUT
+        else
+          echo "is_new_commit=false" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Bump Patch Version
+      if: steps.version-check.outputs.is_new_commit == 'true'
+      run: |
+        CURRENT_VERSION="${{ steps.version-check.outputs.current_version }}"
+        
+        # Split version into components
+        IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+        
+        # Increment patch version
+        NEW_PATCH=$((PATCH + 1))
+        NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH"
+        
+        echo "Bumping version from $CURRENT_VERSION to $NEW_VERSION"
+        
+        # Update Logger.hpp
+        sed -i "s/VERSION.*[0-9]\+\.[0-9]\+\.[0-9]\+/VERSION $NEW_VERSION/" Logger.hpp
+        
+        # Update README.md if version is mentioned
+        sed -i "s/Version:.*[0-9]\+\.[0-9]\+\.[0-9]\+/Version: $NEW_VERSION/" README.md
+        
+        # Commit and push changes
+        git add Logger.hpp README.md
+        git commit -m "chore: bump version to $NEW_VERSION [skip ci]"
+        git push origin main
+        
+        echo "Version bumped to $NEW_VERSION" 
