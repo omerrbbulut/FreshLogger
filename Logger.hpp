@@ -161,8 +161,17 @@ private:
         // File sink setup
         if (!config.logFilePath.empty()) {
             try {
-                // Suppress spdlog file rotation errors by setting environment variable
-                setenv("SPDLOG_LEVEL", "warn", 1);
+                // Suppress spdlog file rotation errors by setting environment variables
+                setenv("SPDLOG_LEVEL", "error", 1);  // Only show errors, not warnings
+                setenv("SPDLOG_ERROR_LEVEL", "critical", 1);  // Only show critical errors
+                
+                // Set global spdlog error handler to suppress file rotation warnings
+                spdlog::set_error_handler([](const std::string& msg) {
+                    // Only log critical errors, ignore file rotation warnings
+                    if (msg.find("rotating_file_sink") == std::string::npos) {
+                        std::cerr << "spdlog error: " << msg << std::endl;
+                    }
+                });
                 
                 // Ensure directory exists and is writable
                 std::filesystem::path logPath(config.logFilePath);
