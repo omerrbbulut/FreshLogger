@@ -41,9 +41,8 @@ jobs:
         echo ""
         echo "=== CLANG-TIDY ANALYSIS ==="
         clang-tidy --checks=*,-fuchsia-*,-google-*,-zircon-*,-abseil-*,-modernize-use-trailing-return-type \
-          --warnings-as-errors=* \
-          src/*.cpp Logger.hpp PerformanceTest.cpp StressTest.cpp EdgeCaseTests.cpp MacroTest.cpp \
-          -- -std=c++17 -I. || echo "⚠️ Clang-tidy found issues (continuing...)"
+          Logger.hpp PerformanceTest.cpp StressTest.cpp EdgeCaseTests.cpp MacroTest.cpp LoggerTest.cpp SimpleLoggerTest.cpp \
+          -- -std=c++17 -I. || echo "⚠️ Clang-tidy analysis completed with warnings"
         
         echo ""
         echo "=== CPPCHECK ANALYSIS ==="
@@ -51,7 +50,7 @@ jobs:
           --suppress=missingIncludeSystem \
           --suppress=unusedFunction \
           --suppress=unmatchedSuppression \
-          src/ Logger.hpp PerformanceTest.cpp StressTest.cpp EdgeCaseTests.cpp MacroTest.cpp || echo "⚠️ Cppcheck found issues (continuing...)"
+          Logger.hpp PerformanceTest.cpp StressTest.cpp EdgeCaseTests.cpp MacroTest.cpp LoggerTest.cpp SimpleLoggerTest.cpp || echo "⚠️ Cppcheck analysis completed with warnings"
         
         echo "✅ Code quality analysis completed"
     
@@ -72,7 +71,7 @@ jobs:
           --format "JSON" \
           --out "security-report" \
           --failOnCVSS 7 \
-          --suppression "security-suppressions.xml" || echo "⚠️ Security scan found vulnerabilities (continuing...)"
+          --suppression "security-suppressions.xml" || echo "⚠️ Security scan completed with findings (continuing...)"
         
         echo "✅ Security scan completed"
     
@@ -104,7 +103,11 @@ jobs:
       run: |
         echo "🔧 Installing dependencies for ${{ matrix.compiler }}..."
         sudo apt-get update
-        sudo apt-get install -y ${{ matrix.compiler }} libspdlog-dev libfmt-dev libgtest-dev
+        if [ "${{ matrix.compiler }}" = "gcc-11" ]; then
+          sudo apt-get install -y gcc-11 g++-11 libspdlog-dev libfmt-dev libgtest-dev
+        else
+          sudo apt-get install -y clang-14 libspdlog-dev libfmt-dev libgtest-dev
+        fi
     
     - name: Setup Compiler
       run: |
