@@ -1,7 +1,7 @@
 /**
  * @brief Header-only modern thread-safe logger using spdlog library
  * @author Ömer Bulut
- * @version 1.0.0
+ * Version: 1.1.0
  * 
  * Features:
  * - Thread-safe logging
@@ -41,6 +41,9 @@ namespace {
                 
                 // Set global log level to critical only
                 spdlog::set_level(spdlog::level::critical);
+                
+                // Also suppress stderr output from spdlog
+                std::cerr.setstate(std::ios_base::failbit);
             } catch (...) {
                 // Ignore any initialization errors
             }
