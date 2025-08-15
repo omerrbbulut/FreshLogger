@@ -1,7 +1,7 @@
 # 🌱 FreshLogger
 
 **Author:** Ömer Bulut  
-**Version:** 1.0.0  
+**Version: 1.1.1  
 **Status:** ✅ Production Ready
 
 A blazing-fast, header-only C++ logging library built on top of spdlog. FreshLogger provides enterprise-grade performance with a simple, modern API.
