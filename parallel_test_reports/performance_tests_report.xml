@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="9" failures="1" disabled="0" errors="0" time="0.284" timestamp="2025-08-15T17:47:05.730" name="AllTests">
+  <testsuite name="PerformanceTest" tests="9" failures="1" disabled="0" skipped="0" errors="0" time="0.284" timestamp="2025-08-15T17:47:05.730">
+    <testcase name="SynchronousThroughput" file="PerformanceTest.cpp" line="113" status="run" result="completed" time="0.002" timestamp="2025-08-15T17:47:05.730" classname="PerformanceTest" />
+    <testcase name="AsynchronousThroughput" file="PerformanceTest.cpp" line="138" status="run" result="completed" time="0.033" timestamp="2025-08-15T17:47:05.732" classname="PerformanceTest" />
+    <testcase name="SingleMessageLatency" file="PerformanceTest.cpp" line="163" status="run" result="completed" time="0." timestamp="2025-08-15T17:47:05.766" classname="PerformanceTest" />
+    <testcase name="MemoryUsageUnderLoad" file="PerformanceTest.cpp" line="198" status="run" result="completed" time="0.002" timestamp="2025-08-15T17:47:05.766" classname="PerformanceTest" />
+    <testcase name="MultiThreadedThroughput" file="PerformanceTest.cpp" line="226" status="run" result="completed" time="0.119" timestamp="2025-08-15T17:47:05.769" classname="PerformanceTest" />
+    <testcase name="HighLoadStressTest" file="PerformanceTest.cpp" line="269" status="run" result="completed" time="0.1" timestamp="2025-08-15T17:47:05.889" classname="PerformanceTest" />
+    <testcase name="FileRotationPerformance" file="PerformanceTest.cpp" line="321" status="run" result="completed" time="0.01" timestamp="2025-08-15T17:47:05.990" classname="PerformanceTest" />
+    <testcase name="BenchmarkComparison" file="PerformanceTest.cpp" line="368" status="run" result="completed" time="0.011" timestamp="2025-08-15T17:47:06.001" classname="PerformanceTest" />
+    <testcase name="PerformanceRegressionTest" file="PerformanceTest.cpp" line="437" status="run" result="completed" time="0.001" timestamp="2025-08-15T17:47:06.012" classname="PerformanceTest">
+      <failure message="PerformanceTest.cpp:475&#x0A;Expected: (performanceRatio) &gt;= (REGRESSION_THRESHOLD), actual: 0.38736263736263737 vs 0.4&#x0A;Performance regression detected in iteration 3&#x0A;" type=""><![CDATA[PerformanceTest.cpp:475
+Expected: (performanceRatio) >= (REGRESSION_THRESHOLD), actual: 0.38736263736263737 vs 0.4
+Performance regression detected in iteration 3
+]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

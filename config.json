@@ -1,0 +1,56 @@
+{
+    "VERSION": "1.2.0",
+    "PROJECT": "FreshLogger",
+    "DESCRIPTION": "Enterprise-grade C++ logging library with comprehensive CI/CD pipeline",
+    "AUTHOR": "Ömer Bulut",
+    "LICENSE": "MIT",
+    "REPOSITORY": "https://github.com/omerrbbulut/FreshLogger",
+    "CI_CD": {
+        "PHASE_1": {
+            "CODE_QUALITY": true,
+            "SECURITY_SCAN": true,
+            "CROSS_COMPILER": true
+        },
+        "PHASE_2": {
+            "PARALLEL_TESTING": true,
+            "BUILD_CACHING": true,
+            "PERFORMANCE_REGRESSION": true
+        },
+        "PHASE_3": {
+            "CROSS_PLATFORM": false,
+            "INTEGRATION_TESTS": false,
+            "LOAD_TESTING": false
+        }
+    },
+    "BUILD": {
+        "COMPILERS": ["gcc-11", "clang-14"],
+        "CXX_STANDARD": "17",
+        "OPTIMIZATION": "O2",
+        "WARNINGS": "all"
+    },
+    "TESTING": {
+        "UNIT_TESTS": true,
+        "PERFORMANCE_TESTS": true,
+        "STRESS_TESTS": true,
+        "EDGE_CASE_TESTS": true,
+        "MACRO_TESTS": true,
+        "PARALLEL_EXECUTION": true,
+        "TIMEOUT_SECONDS": 120
+    },
+    "CACHE": {
+        "ENABLED": true,
+        "MAX_SIZE_MB": 500,
+        "CLEANUP_THRESHOLD": 80
+    },
+    "PERFORMANCE": {
+        "REGRESSION_THRESHOLD": 10,
+        "BASELINE_HISTORY": 10,
+        "METRICS": [
+            "throughput_msg_per_sec",
+            "latency_microseconds",
+            "memory_usage_kb",
+            "file_rotation_time_ms",
+            "concurrent_threads"
+        ]
+    }
+} 

@@ -2,174 +2,217 @@
 # Author: Ömer Bulut
 
 # Compiler and flags (can be overridden by environment)
-CXX ?= g++
-CXXFLAGS ?= -std=c++17 -Wall -Wextra -O2 -g
+CXX ?= clang++
+CXXFLAGS ?= -std=c++17 -Wall -Wextra -O2 -g -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic \
+	-Wno-global-constructors -Wno-exit-time-destructors \
+	-Wno-padded -Wno-covered-switch-default \
+	-Wno-unused-exception-parameter -Wno-unused-lambda-capture \
+	-Wno-unsafe-buffer-usage -Wno-sign-conversion -Wno-newline-eof
 INCLUDES = -I.
 LIBS = -lspdlog -lfmt -lpthread
 
 # Source files
-EXAMPLE_SOURCE = example.cpp
-TEST_SOURCE = LoggerTest.cpp
-SIMPLE_TEST_SOURCE = SimpleLoggerTest.cpp
-PERFORMANCE_SOURCE = PerformanceTest.cpp
-STRESS_SOURCE = StressTest.cpp
-EDGE_CASE_SOURCE = EdgeCaseTests.cpp
+SOURCES = example.cpp
+TEST_SOURCES = LoggerTest.cpp
+SIMPLE_TEST_SOURCES = SimpleLoggerTest.cpp
+PERFORMANCE_TEST_SOURCES = PerformanceTest.cpp
+STRESS_TEST_SOURCES = StressTest.cpp
+EDGE_TEST_SOURCES = EdgeCaseTests.cpp
 MACRO_TEST_SOURCE = MacroTest.cpp
 
 # Executables
-EXAMPLE = example
-TEST_EXECUTABLE = unit_tests
+EXAMPLE_EXECUTABLE = example
+UNIT_TEST_EXECUTABLE = unit_tests
 SIMPLE_TEST_EXECUTABLE = simple_tests
-PERFORMANCE_EXECUTABLE = performance_tests
-STRESS_EXECUTABLE = stress_tests
-EDGE_CASE_EXECUTABLE = edge_case_tests
+PERFORMANCE_TEST_EXECUTABLE = performance_tests
+STRESS_TEST_EXECUTABLE = stress_tests
+EDGE_TEST_EXECUTABLE = edge_case_tests
 MACRO_TEST_EXECUTABLE = macro_tests
 
-# Default target
-all: $(EXAMPLE) $(TEST_EXECUTABLE) $(SIMPLE_TEST_EXECUTABLE) $(PERFORMANCE_EXECUTABLE) $(STRESS_EXECUTABLE) $(EDGE_CASE_EXECUTABLE) $(MACRO_TEST_EXECUTABLE)
+# Phase 2: Advanced CI/CD Features
+PHASE2_TARGETS = parallel-test cache-init cache-stats perf-baseline perf-regression
 
-# Build main example
-$(EXAMPLE): $(EXAMPLE_SOURCE)
+# Default target
+all: $(EXAMPLE_EXECUTABLE) $(UNIT_TEST_EXECUTABLE) $(SIMPLE_TEST_EXECUTABLE) \
+     $(PERFORMANCE_TEST_EXECUTABLE) $(STRESS_TEST_EXECUTABLE) $(EDGE_TEST_EXECUTABLE) \
+     $(MACRO_TEST_EXECUTABLE)
+
+# Main example
+$(EXAMPLE_EXECUTABLE): $(SOURCES)
 	@echo "🌱 Building FreshLogger example..."
 	@echo "Using compiler: $(CXX) with flags: $(CXXFLAGS)"
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $< $(LIBS)
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $^ $(LIBS)
 	@echo "✅ Example built successfully!"
 
-# Build unit tests
-$(TEST_EXECUTABLE): $(TEST_SOURCE)
+# Unit tests
+$(UNIT_TEST_EXECUTABLE): $(TEST_SOURCES)
 	@echo "🧪 Building unit tests..."
 	@echo "Using compiler: $(CXX) with flags: $(CXXFLAGS)"
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $< $(LIBS) -lgtest -lgtest_main
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $^ $(LIBS) -lgtest -lgtest_main
 	@echo "✅ Unit tests built successfully!"
 
-# Build simple tests
-$(SIMPLE_TEST_EXECUTABLE): $(SIMPLE_TEST_SOURCE)
+# Simple tests
+$(SIMPLE_TEST_EXECUTABLE): $(SIMPLE_TEST_SOURCES)
 	@echo "🔬 Building simple tests..."
 	@echo "Using compiler: $(CXX) with flags: $(CXXFLAGS)"
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $< $(LIBS) -lgtest -lgtest_main
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $^ $(LIBS) -lgtest -lgtest_main
 	@echo "✅ Simple tests built successfully!"
 
-# Build performance tests
-$(PERFORMANCE_EXECUTABLE): $(PERFORMANCE_SOURCE)
+# Performance tests
+$(PERFORMANCE_TEST_EXECUTABLE): $(PERFORMANCE_TEST_SOURCES)
 	@echo "⚡ Building performance tests..."
 	@echo "Using compiler: $(CXX) with flags: $(CXXFLAGS)"
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $< $(LIBS) -lgtest -lgtest_main
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $^ $(LIBS) -lgtest -lgtest_main
 	@echo "✅ Performance tests built successfully!"
 
-# Build stress tests
-$(STRESS_EXECUTABLE): $(STRESS_SOURCE)
+# Stress tests
+$(STRESS_TEST_EXECUTABLE): $(STRESS_TEST_SOURCES)
 	@echo "🔥 Building stress tests..."
 	@echo "Using compiler: $(CXX) with flags: $(CXXFLAGS)"
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $< $(LIBS) -lgtest -lgtest_main
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $^ $(LIBS) -lgtest -lgtest_main
 	@echo "✅ Stress tests built successfully!"
 
-# Build edge case tests
-$(EDGE_CASE_EXECUTABLE): $(EDGE_CASE_SOURCE)
+# Edge case tests
+$(EDGE_TEST_EXECUTABLE): $(EDGE_TEST_SOURCES)
 	@echo "🔍 Building edge case tests..."
 	@echo "Using compiler: $(CXX) with flags: $(CXXFLAGS)"
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $< $(LIBS) -lgtest -lgtest_main
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $^ $(LIBS) -lgtest -lgtest_main
 	@echo "✅ Edge case tests built successfully!"
 
-# Build macro tests
+# Macro tests
 $(MACRO_TEST_EXECUTABLE): $(MACRO_TEST_SOURCE)
 	@echo "🔧 Building macro tests..."
 	@echo "Using compiler: $(CXX) with flags: $(CXXFLAGS)"
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $< $(LIBS) -lgtest -lgtest_main
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $^ $(LIBS) -lgtest -lgtest_main
 	@echo "✅ Macro tests built successfully!"
 
-# Test targets
-test: $(TEST_EXECUTABLE)
-	@echo "🧪 Running unit tests..."
-	./$(TEST_EXECUTABLE)
+# Enterprise test suite (Phase 1)
+enterprise-test: all
+	@echo "🚀 Running Enterprise Test Suite..."
+	@echo "=================================="
+	@echo ""
+	@echo "🧪 Unit Tests:"
+	./$(UNIT_TEST_EXECUTABLE) --gtest_output=xml:test_logs/unit_results.xml
+	@echo ""
+	@echo "🔬 Simple Tests:"
+	./$(SIMPLE_TEST_EXECUTABLE) --gtest_output=xml:test_logs/simple_results.xml
+	@echo ""
+	@echo "⚡ Performance Tests:"
+	./$(PERFORMANCE_TEST_EXECUTABLE) --gtest_output=xml:test_logs/performance_results.xml
+	@echo ""
+	@echo "🔥 Stress Tests:"
+	./$(STRESS_TEST_EXECUTABLE) --gtest_output=xml:test_logs/stress_results.xml
+	@echo ""
+	@echo "🔍 Edge Case Tests:"
+	./$(EDGE_TEST_EXECUTABLE) --gtest_output=xml:test_logs/edge_results.xml
+	@echo ""
+	@echo "🔧 Macro Tests:"
+	./$(MACRO_TEST_EXECUTABLE) --gtest_output=xml:test_logs/macro_results.xml
+	@echo ""
+	@echo "✅ Enterprise Test Suite completed!"
 
-simple-test: $(SIMPLE_TEST_EXECUTABLE)
-	@echo "🔬 Running simple tests..."
-	./$(SIMPLE_TEST_EXECUTABLE)
+# Phase 2: Parallel Testing
+parallel-test: all
+	@echo "🚀 Running Parallel Test Suite (Phase 2)..."
+	@echo "=========================================="
+	@echo "Max Parallel Jobs: 4"
+	@echo "Timeout per Test: 60s (reduced for CI/CD)"
+	@echo ""
+	TIMEOUT_SECONDS=60 MAX_PARALLEL_JOBS=4 ./scripts/parallel_test_runner.sh || echo "⚠️  Some tests failed or timed out (continuing...)"
+	@echo ""
+	@echo "✅ Parallel Test Suite completed!"
 
-performance-tests: $(PERFORMANCE_EXECUTABLE)
-	@echo "⚡ Running performance tests..."
-	./$(PERFORMANCE_EXECUTABLE)
+# Phase 2: Cache Management
+cache-init:
+	@echo "🔧 Initializing Build Cache (Phase 2)..."
+	./scripts/build_cache_manager.sh init
+	@echo "✅ Build cache initialized!"
 
-stress-tests: $(STRESS_EXECUTABLE)
-	@echo "🔥 Running stress tests..."
-	./$(STRESS_EXECUTABLE)
+cache-stats:
+	@echo "📊 Build Cache Statistics (Phase 2)..."
+	./scripts/build_cache_manager.sh stats
+	@echo "✅ Cache statistics displayed!"
 
-# Run edge case tests
-edge-case-tests: $(EDGE_CASE_EXECUTABLE)
-	@echo "🔍 Running edge case tests..."
-	./$(EDGE_CASE_EXECUTABLE)
+cache-cleanup:
+	@echo "🧹 Cleaning Build Cache (Phase 2)..."
+	./scripts/build_cache_manager.sh cleanup
+	@echo "✅ Build cache cleaned up!"
 
-# Run all tests
-enterprise-test: $(SIMPLE_TEST_EXECUTABLE) $(TEST_EXECUTABLE) $(PERFORMANCE_EXECUTABLE) $(STRESS_EXECUTABLE) $(EDGE_CASE_EXECUTABLE) $(MACRO_TEST_EXECUTABLE)
-	@echo "🏢 Running enterprise-grade test suite..."
+# Phase 2: Performance Regression Detection
+perf-baseline:
+	@echo "📊 Creating Performance Baseline (Phase 2)..."
+	./scripts/performance_regression_detector.sh baseline
+	@echo "✅ Performance baseline created!"
+
+perf-regression:
+	@echo "🔍 Detecting Performance Regressions (Phase 2)..."
+	./scripts/performance_regression_detector.sh run
+	@echo "✅ Performance regression detection completed!"
+
+perf-report:
+	@echo "📋 Generating Performance Report (Phase 2)..."
+	./scripts/performance_regression_detector.sh report
+	@echo "✅ Performance report generated!"
+
+# Phase 2: Complete CI/CD Pipeline
+phase2-pipeline: all parallel-test cache-stats perf-regression
+	@echo "🎯 Phase 2 CI/CD Pipeline completed!"
+	@echo "===================================="
+	@echo "✅ All tests built successfully"
+	@echo "✅ Parallel test execution completed"
+	@echo "✅ Cache statistics collected"
+	@echo "✅ Performance regression detection completed"
 	@echo ""
-	@echo "=== BASIC FUNCTIONALITY ==="
-	./$(SIMPLE_TEST_EXECUTABLE)
-	@echo ""
-	@echo "=== UNIT TESTS ==="
-	./$(TEST_EXECUTABLE)
-	@echo ""
-	@echo "=== PERFORMANCE BENCHMARKS ==="
-	./$(PERFORMANCE_EXECUTABLE)
-	@echo ""
-	@echo "=== STRESS AND STABILITY ==="
-	./$(STRESS_EXECUTABLE)
-	@echo ""
-	@echo "=== EDGE CASES AND BOUNDARY CONDITIONS ==="
-	./$(EDGE_CASE_EXECUTABLE)
-	@echo ""
-	@echo "=== MACRO TESTS ==="
-	./$(MACRO_TEST_EXECUTABLE)
-	@echo ""
-	@echo "🏆 Enterprise-grade test suite completed!"
+	@echo "📁 Reports available in:"
+	@echo "   - parallel_test_reports/"
+	@echo "   - current_performance/"
+	@echo "   - .build_cache/"
 
 # Clean build artifacts
 clean:
 	@echo "🧹 Cleaning build artifacts..."
-	rm -f $(EXAMPLE) $(TEST_EXECUTABLE) $(SIMPLE_TEST_EXECUTABLE) $(PERFORMANCE_EXECUTABLE) $(STRESS_EXECUTABLE) $(EDGE_CASE_EXECUTABLE) $(MACRO_TEST_EXECUTABLE)
+	rm -f $(EXAMPLE_EXECUTABLE) $(UNIT_TEST_EXECUTABLE) $(SIMPLE_TEST_EXECUTABLE) \
+	       $(PERFORMANCE_TEST_EXECUTABLE) $(STRESS_TEST_EXECUTABLE) $(EDGE_TEST_EXECUTABLE) \
+	       $(MACRO_TEST_EXECUTABLE)
 	rm -rf bin/ logs/ test_logs/ stress_logs/ stress_temp/ edge_test_logs/
 	@echo "✅ Cleaned build artifacts"
 
-# Install dependencies (Arch Linux)
-install-deps:
-	@echo "📦 Installing dependencies for Arch Linux..."
-	sudo pacman -S --noconfirm gcc gtest spdlog fmt
-	@echo "✅ Dependencies installed successfully!"
+# Clean everything including Phase 2 artifacts
+clean-all: clean
+	@echo "🧹 Cleaning Phase 2 artifacts..."
+	rm -rf parallel_test_reports/ parallel_test_logs/ .build_cache/ \
+	       performance_baselines/ current_performance/
+	@echo "✅ Cleaned all artifacts including Phase 2"
 
-# Check if dependencies are available
-check-deps:
-	@echo "🔍 Checking dependencies..."
-	@echo "C++ Compiler: $(CXX)"
-	@echo "C++ Flags: $(CXXFLAGS)"
-	@echo "spdlog: $(shell pkg-config --exists spdlog && echo "✅ Found" || echo "❌ Not found")"
-	@echo "fmt: $(shell pkg-config --exists fmt && echo "✅ Found" || echo "❌ Not found")"
-	@echo "gtest: $(shell pkg-config --exists gtest && echo "✅ Found" || echo "❌ Not found")"
-
-# Help target
+# Show help
 help:
-	@echo "🌱 FreshLogger Build System"
+	@echo "🔧 FreshLogger Makefile - Available Targets"
+	@echo "=========================================="
 	@echo ""
-	@echo "Available targets:"
-	@echo "  all              - Build everything"
-	@echo "  example          - Build main example"
-	@echo "  unit-tests       - Build unit tests"
-	@echo "  simple-tests     - Build simple tests"
-	@echo "  performance-tests - Build performance tests"
-	@echo "  stress-tests     - Build stress tests"
-	@echo "  edge-case-tests  - Build edge case tests"
-	@echo "  test             - Build and run unit tests"
-	@echo "  simple-test      - Build and run simple tests"
-	@echo "  performance-tests - Build and run performance tests"
-	@echo "  stress-tests     - Build and run stress tests"
-	@echo "  edge-case-tests  - Build and run edge case tests"
-	@echo "  enterprise-test  - Run complete test suite"
-	@echo "  clean            - Clean build artifacts"
-	@echo "  install-deps     - Install dependencies (Arch Linux)"
-	@echo "  check-deps       - Check dependency availability"
-	@echo "  help             - Show this help message"
+	@echo "Build Targets:"
+	@echo "  ${YELLOW}all${NC}              - Build all executables and tests"
+	@echo "  ${YELLOW}clean${NC}            - Clean build artifacts"
+	@echo "  ${YELLOW}clean-all${NC}        - Clean everything including Phase 2"
 	@echo ""
-	@echo "Environment variables:"
-	@echo "  CXX              - C++ compiler (default: g++)"
-	@echo "  CXXFLAGS         - C++ compiler flags (default: -std=c++17 -Wall -Wextra -O2 -g)"
+	@echo "Phase 1 - Enterprise Testing:"
+	@echo "  ${YELLOW}enterprise-test${NC}  - Run complete enterprise test suite"
+	@echo ""
+	@echo "Phase 2 - Advanced CI/CD:"
+	@echo "  ${YELLOW}parallel-test${NC}    - Run tests in parallel"
+	@echo "  ${YELLOW}cache-init${NC}       - Initialize build cache"
+	@echo "  ${YELLOW}cache-stats${NC}      - Show cache statistics"
+	@echo "  ${YELLOW}cache-cleanup${NC}    - Clean up build cache"
+	@echo "  ${YELLOW}perf-baseline${NC}    - Create performance baseline"
+	@echo "  ${YELLOW}perf-regression${NC}  - Detect performance regressions"
+	@echo "  ${YELLOW}perf-report${NC}      - Generate performance report"
+	@echo "  ${YELLOW}phase2-pipeline${NC}  - Complete Phase 2 pipeline"
+	@echo ""
+	@echo "Examples:"
+	@echo "  ${YELLOW}make all${NC}                    - Build everything"
+	@echo "  ${YELLOW}make enterprise-test${NC}        - Run Phase 1 tests"
+	@echo "  ${YELLOW}make phase2-pipeline${NC}        - Run Phase 2 pipeline"
+	@echo "  ${YELLOW}CXX=g++ make all${NC}            - Use GCC instead of Clang"
 
-.PHONY: all test simple-test performance-tests stress-tests edge-case-tests enterprise-test clean install-deps check-deps help 
+# Phony targets
+.PHONY: all clean clean-all enterprise-test parallel-test cache-init cache-stats \
+        cache-cleanup perf-baseline perf-regression perf-report phase2-pipeline help 

@@ -168,7 +168,7 @@ TEST_F(StressTest, ExtremeLoadTest) {
             for (int i = 0; i < EXTREME_MESSAGE_COUNT / MAX_THREADS && !shouldStop; ++i) {
                 try {
                     // Generate messages of varying sizes
-                    size_t messageSize = (i % 100 == 0) ? MAX_MESSAGE_SIZE : (i % 1000) + 100;
+                    size_t messageSize = (i % 100 == 0) ? MAX_MESSAGE_SIZE : static_cast<size_t>(i % 1000) + 100;
                     std::string message = "Extreme load test - Thread " + std::to_string(t) + 
                                         " - Message " + std::to_string(i) + " - " +
                                         generateRandomMessage(messageSize);
@@ -290,7 +290,7 @@ TEST_F(StressTest, MemoryPressureTest) {
             for (int i = 0; i < 100000; ++i) { // Reduced from 1M to 100K per thread
                 try {
                     // Generate large messages to stress memory
-                    size_t messageSize = 1000 + (i % 500); // Reduced from 10KB to 1-1.5KB
+                    size_t messageSize = 1000 + static_cast<size_t>(i % 500); // Reduced from 10KB to 1-1.5KB
                     std::string message = "Memory pressure test - Thread " + std::to_string(t) + 
                                         " - Message " + std::to_string(i) + " - " +
                                         generateRandomMessage(messageSize);

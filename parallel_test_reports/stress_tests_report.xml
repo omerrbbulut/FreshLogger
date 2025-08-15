@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="5" failures="1" disabled="0" errors="0" time="89.995" timestamp="2025-08-15T17:42:16.854" name="AllTests">
+  <testsuite name="StressTest" tests="5" failures="1" disabled="0" skipped="0" errors="0" time="89.995" timestamp="2025-08-15T17:42:16.854">
+    <testcase name="ExtremeLoadTest" file="StressTest.cpp" line="149" status="run" result="completed" time="15.17" timestamp="2025-08-15T17:42:16.854" classname="StressTest" />
+    <testcase name="MemoryPressureTest" file="StressTest.cpp" line="271" status="run" result="completed" time="6.701" timestamp="2025-08-15T17:42:32.025" classname="StressTest">
+      <failure message="StressTest.cpp:349&#x0A;Expected: (memoryIncrease) &lt; (150000), actual: 379660 vs 150000&#x0A;Memory increase should be &lt; 150MB (realistic for 400K messages)&#x0A;" type=""><![CDATA[StressTest.cpp:349
+Expected: (memoryIncrease) < (150000), actual: 379660 vs 150000
+Memory increase should be < 150MB (realistic for 400K messages)
+]]></failure>
+    </testcase>
+    <testcase name="CPUPressureTest" file="StressTest.cpp" line="355" status="run" result="completed" time="7.702" timestamp="2025-08-15T17:42:38.726" classname="StressTest" />
+    <testcase name="LongRunningStabilityTest" file="StressTest.cpp" line="420" status="run" result="completed" time="60.098" timestamp="2025-08-15T17:42:46.429" classname="StressTest" />
+    <testcase name="ResourceExhaustionTest" file="StressTest.cpp" line="550" status="run" result="completed" time="0.322" timestamp="2025-08-15T17:43:46.527" classname="StressTest" />
+  </testsuite>
+</testsuites>

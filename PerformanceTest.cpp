@@ -178,7 +178,7 @@ TEST_F(PerformanceTest, SingleMessageLatency) {
     // Calculate statistics
     auto total = std::accumulate(latencies.begin(), latencies.end(), 
                                 std::chrono::microseconds(0));
-    auto avgLatency = total.count() / latencies.size();
+    auto avgLatency = total.count() / static_cast<long>(latencies.size());
     
     auto minLatency = std::min_element(latencies.begin(), latencies.end())->count();
     auto maxLatency = std::max_element(latencies.begin(), latencies.end())->count();
@@ -232,7 +232,7 @@ TEST_F(PerformanceTest, MultiThreadedThroughput) {
     
     // Create multiple threads logging simultaneously
     for (int t = 0; t < THREAD_COUNT; ++t) {
-        threads.emplace_back([&, t]() {
+        threads.emplace_back([&]() {
             for (int i = 0; i < LARGE_TEST_SIZE / THREAD_COUNT; ++i) {
                 logger.info("Thread " + std::to_string(t) + " - Message " + std::to_string(i));
                 messageCount++;
@@ -410,7 +410,7 @@ TEST_F(PerformanceTest, BenchmarkComparison) {
         auto start = std::chrono::high_resolution_clock::now();
         
         for (int t = 0; t < 4; ++t) {
-            threads.emplace_back([&, t]() {
+            threads.emplace_back([&]() {
                 for (int i = 0; i < SMALL_TEST_SIZE / 4; ++i) {
                     logger.info("Benchmark multi-thread message " + std::to_string(i));
                 }

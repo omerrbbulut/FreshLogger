@@ -27,6 +27,19 @@
 #include <fstream> // For std::ofstream
 #include <sstream> // For std::stringstream
 #include <streambuf> // For std::streambuf
+#include <stdexcept> // For std::runtime_error
+#include <exception> // For std::exception
+#include <cstdint> // For uintptr_t
+
+// Constants for magic numbers
+namespace LoggerConstants {
+    constexpr size_t DEFAULT_MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    constexpr int DEFAULT_MAX_FILES = 5;
+    constexpr size_t DEFAULT_QUEUE_SIZE = 8192;
+    constexpr size_t DEFAULT_FLUSH_INTERVAL = 3;
+    constexpr size_t KILOBYTE = 1024;
+    constexpr size_t MEGABYTE = KILOBYTE * KILOBYTE;
+}
 
 // Set global spdlog error handler to suppress file rotation warnings
 namespace {
@@ -89,11 +102,11 @@ public:
             minLevel(LogLevel::INFO),
             consoleOutput(true),
             asyncLogging(false), // Default to sync for better compatibility
-            maxFileSize(10 * 1024 * 1024),
-            maxFiles(5),
+            maxFileSize(LoggerConstants::DEFAULT_MAX_FILE_SIZE),
+            maxFiles(LoggerConstants::DEFAULT_MAX_FILES),
             pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] [%t] %v"),
-            queueSize(8192),
-            flushInterval(3) {}
+            queueSize(LoggerConstants::DEFAULT_QUEUE_SIZE),
+            flushInterval(LoggerConstants::DEFAULT_FLUSH_INTERVAL) {}
     };
 
     /**
@@ -115,27 +128,39 @@ public:
 
     // Logging methods
     void info(const std::string& message) {
-        if (m_logger) m_logger->info(message);
+        if (m_logger) {
+            m_logger->info(message);
+        }
     }
     
     void warning(const std::string& message) {
-        if (m_logger) m_logger->warn(message);
+        if (m_logger) {
+            m_logger->warn(message);
+        }
     }
     
     void error(const std::string& message) {
-        if (m_logger) m_logger->error(message);
+        if (m_logger) {
+            m_logger->error(message);
+        }
     }
     
     void debug(const std::string& message) {
-        if (m_logger) m_logger->debug(message);
+        if (m_logger) {
+            m_logger->debug(message);
+        }
     }
     
     void trace(const std::string& message) {
-        if (m_logger) m_logger->trace(message);
+        if (m_logger) {
+            m_logger->trace(message);
+        }
     }
     
     void fatal(const std::string& message) {
-        if (m_logger) m_logger->critical(message);
+        if (m_logger) {
+            m_logger->critical(message);
+        }
     }
     
     /**
@@ -162,14 +187,18 @@ public:
      * @brief Flush all pending log messages
      */
     void flush() {
-        if (m_logger) m_logger->flush();
+        if (m_logger) {
+            m_logger->flush();
+        }
     }
     
     /**
      * @brief Get underlying spdlog logger instance
      * @return Shared pointer to spdlog logger
      */
-    std::shared_ptr<spdlog::logger> getLogger() const { return m_logger; }
+    [[nodiscard]] std::shared_ptr<spdlog::logger> getLogger() const { 
+        return m_logger; 
+    }
 
 private:
     void setupLogger(const Config& config) {
@@ -210,7 +239,7 @@ private:
                     try {
                         std::ofstream testStream(testFile);
                         if (testStream.is_open()) {
-                            testStream << "test" << std::endl;
+                            testStream << "test\n";
                             testStream.close();
                             std::filesystem::remove(testFile);
                         } else {
@@ -218,7 +247,7 @@ private:
                         }
                     } catch (const std::exception& ex) {
                         // stderr will be restored by guard destructor
-                        std::cerr << "Warning: Log directory not writable: " << logDir << " - " << ex.what() << std::endl;
+                        std::cerr << "Warning: Log directory not writable: " << logDir << " - " << ex.what() << '\n';
                         // Fall back to console only
                         if (sinks.empty()) {
                             auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
@@ -244,7 +273,7 @@ private:
             } catch (const std::exception& ex) {
                 // Fallback to console if file creation fails
                 std::cerr << "Warning: Could not create log file: " << config.logFilePath 
-                          << " - " << ex.what() << std::endl;
+                          << " - " << ex.what() << '\n';
                 if (sinks.empty()) {
                     auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
                     console_sink->set_level(convertLevel(config.minLevel));
@@ -299,7 +328,7 @@ private:
         }
     }
     
-    spdlog::level::level_enum convertLevel(LogLevel level) const {
+    [[nodiscard]] static spdlog::level::level_enum convertLevel(LogLevel level) {
         switch (level) {
             case LogLevel::TRACE:   return spdlog::level::trace;
             case LogLevel::DEBUG:   return spdlog::level::debug;

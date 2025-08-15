@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="11" failures="0" disabled="0" errors="0" time="0.103" timestamp="2025-08-15T17:47:05.729" name="AllTests">
+  <testsuite name="LoggerTest" tests="11" failures="0" disabled="0" skipped="0" errors="0" time="0.103" timestamp="2025-08-15T17:47:05.729">
+    <testcase name="DefaultConstructor" file="LoggerTest.cpp" line="50" status="run" result="completed" time="0." timestamp="2025-08-15T17:47:05.729" classname="LoggerTest" />
+    <testcase name="CustomConfiguration" file="LoggerTest.cpp" line="63" status="run" result="completed" time="0." timestamp="2025-08-15T17:47:05.729" classname="LoggerTest" />
+    <testcase name="LogLevels" file="LoggerTest.cpp" line="84" status="run" result="completed" time="0." timestamp="2025-08-15T17:47:05.730" classname="LoggerTest" />
+    <testcase name="DynamicLogLevelChange" file="LoggerTest.cpp" line="112" status="run" result="completed" time="0." timestamp="2025-08-15T17:47:05.730" classname="LoggerTest" />
+    <testcase name="ConfigurationChange" file="LoggerTest.cpp" line="143" status="run" result="completed" time="0." timestamp="2025-08-15T17:47:05.730" classname="LoggerTest" />
+    <testcase name="FileRotation" file="LoggerTest.cpp" line="176" status="run" result="completed" time="0.001" timestamp="2025-08-15T17:47:05.730" classname="LoggerTest" />
+    <testcase name="AsyncLogging" file="LoggerTest.cpp" line="202" status="run" result="completed" time="0." timestamp="2025-08-15T17:47:05.731" classname="LoggerTest" />
+    <testcase name="MultiThreadedLogging" file="LoggerTest.cpp" line="228" status="run" result="completed" time="0.1" timestamp="2025-08-15T17:47:05.732" classname="LoggerTest" />
+    <testcase name="ErrorHandling" file="LoggerTest.cpp" line="293" status="run" result="completed" time="0." timestamp="2025-08-15T17:47:05.832" classname="LoggerTest" />
+    <testcase name="FlushFunctionality" file="LoggerTest.cpp" line="322" status="run" result="completed" time="0." timestamp="2025-08-15T17:47:05.832" classname="LoggerTest" />
+    <testcase name="PatternFormatting" file="LoggerTest.cpp" line="338" status="run" result="completed" time="0." timestamp="2025-08-15T17:47:05.832" classname="LoggerTest" />
+  </testsuite>
+</testsuites>

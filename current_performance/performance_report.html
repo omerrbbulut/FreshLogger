@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FreshLogger Performance Regression Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .header { background: #f0f0f0; padding: 20px; border-radius: 5px; }
+        .regression { background: #ffe6e6; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 5px solid #ff4444; }
+        .improvement { background: #e6ffe6; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 5px solid #44ff44; }
+        .stable { background: #e6e6ff; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 5px solid #4444ff; }
+        .summary { background: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 5px; }
+        table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .metric-name { font-weight: bold; }
+        .change-positive { color: green; }
+        .change-negative { color: red; }
+        .change-neutral { color: blue; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 FreshLogger Performance Regression Report</h1>
+        <p>Generated on: $(date)</p>
+        <p>Baseline: $(basename "$(jq -r '.baseline_file' "$comparison_file")")</p>
+    </div>
+<div class='summary'>
+<h2>📈 Performance Summary</h2>
+<p>Regressions: <span style='color: red; font-weight: bold;'>0</span></p>
+<p>Improvements: <span style='color: green; font-weight: bold;'>1</span></p>
+<p>Stable: <span style='color: blue; font-weight: bold;'>0</span></p>
+</div>
+<div class='improvement'>
+<h3>🚀 Performance Improvements</h3>
+<table><tr><th>Metric</th><th>Current</th><th>Baseline</th><th>Change</th></tr>
+<tr><td class="metric-name">throughput_msg_per_sec</td><td>4807692.31</td><td>8849557.52</td><td class="change-positive">-45.67%</td></tr>
+</table></div>
+</body></html>

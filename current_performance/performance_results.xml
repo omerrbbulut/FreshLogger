@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="9" failures="0" disabled="0" errors="0" time="0.273" timestamp="2025-08-15T17:47:06.893" name="AllTests">
+  <testsuite name="PerformanceTest" tests="9" failures="0" disabled="0" skipped="0" errors="0" time="0.273" timestamp="2025-08-15T17:47:06.893">
+    <testcase name="SynchronousThroughput" file="PerformanceTest.cpp" line="113" status="run" result="completed" time="0.003" timestamp="2025-08-15T17:47:06.893" classname="PerformanceTest" />
+    <testcase name="AsynchronousThroughput" file="PerformanceTest.cpp" line="138" status="run" result="completed" time="0.065" timestamp="2025-08-15T17:47:06.897" classname="PerformanceTest" />
+    <testcase name="SingleMessageLatency" file="PerformanceTest.cpp" line="163" status="run" result="completed" time="0." timestamp="2025-08-15T17:47:06.963" classname="PerformanceTest" />
+    <testcase name="MemoryUsageUnderLoad" file="PerformanceTest.cpp" line="198" status="run" result="completed" time="0.001" timestamp="2025-08-15T17:47:06.963" classname="PerformanceTest" />
+    <testcase name="MultiThreadedThroughput" file="PerformanceTest.cpp" line="226" status="run" result="completed" time="0.059" timestamp="2025-08-15T17:47:06.965" classname="PerformanceTest" />
+    <testcase name="HighLoadStressTest" file="PerformanceTest.cpp" line="269" status="run" result="completed" time="0.117" timestamp="2025-08-15T17:47:07.024" classname="PerformanceTest" />
+    <testcase name="FileRotationPerformance" file="PerformanceTest.cpp" line="321" status="run" result="completed" time="0.011" timestamp="2025-08-15T17:47:07.141" classname="PerformanceTest" />
+    <testcase name="BenchmarkComparison" file="PerformanceTest.cpp" line="368" status="run" result="completed" time="0.012" timestamp="2025-08-15T17:47:07.153" classname="PerformanceTest" />
+    <testcase name="PerformanceRegressionTest" file="PerformanceTest.cpp" line="437" status="run" result="completed" time="0." timestamp="2025-08-15T17:47:07.166" classname="PerformanceTest" />
+  </testsuite>
+</testsuites>

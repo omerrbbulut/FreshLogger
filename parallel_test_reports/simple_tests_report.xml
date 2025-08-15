@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="10" failures="0" disabled="0" errors="0" time="0." timestamp="2025-08-15T17:47:05.728" name="AllTests">
+  <testsuite name="SimpleLoggerTest" tests="10" failures="0" disabled="0" skipped="0" errors="0" time="0." timestamp="2025-08-15T17:47:05.728">
+    <testcase name="BasicCreation" file="SimpleLoggerTest.cpp" line="24" status="run" result="completed" time="0." timestamp="2025-08-15T17:47:05.728" classname="SimpleLoggerTest" />
+    <testcase name="LoggingMethodsExist" file="SimpleLoggerTest.cpp" line="30" status="run" result="completed" time="0." timestamp="2025-08-15T17:47:05.728" classname="SimpleLoggerTest" />
+    <testcase name="ConfigStructure" file="SimpleLoggerTest.cpp" line="51" status="run" result="completed" time="0." timestamp="2025-08-15T17:47:05.728" classname="SimpleLoggerTest" />
+    <testcase name="LogLevelEnum" file="SimpleLoggerTest.cpp" line="65" status="run" result="completed" time="0." timestamp="2025-08-15T17:47:05.728" classname="SimpleLoggerTest" />
+    <testcase name="CustomConfig" file="SimpleLoggerTest.cpp" line="76" status="run" result="completed" time="0." timestamp="2025-08-15T17:47:05.728" classname="SimpleLoggerTest" />
+    <testcase name="SetLogLevel" file="SimpleLoggerTest.cpp" line="89" status="run" result="completed" time="0." timestamp="2025-08-15T17:47:05.728" classname="SimpleLoggerTest" />
+    <testcase name="FlushMethod" file="SimpleLoggerTest.cpp" line="99" status="run" result="completed" time="0." timestamp="2025-08-15T17:47:05.728" classname="SimpleLoggerTest" />
+    <testcase name="GetLoggerInstance" file="SimpleLoggerTest.cpp" line="107" status="run" result="completed" time="0." timestamp="2025-08-15T17:47:05.728" classname="SimpleLoggerTest" />
+    <testcase name="MultipleInstances" file="SimpleLoggerTest.cpp" line="115" status="run" result="completed" time="0." timestamp="2025-08-15T17:47:05.728" classname="SimpleLoggerTest" />
+    <testcase name="LoggerDestruction" file="SimpleLoggerTest.cpp" line="128" status="run" result="completed" time="0." timestamp="2025-08-15T17:47:05.728" classname="SimpleLoggerTest" />
+  </testsuite>
+</testsuites>
