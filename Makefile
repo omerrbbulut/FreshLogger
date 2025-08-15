@@ -14,6 +14,7 @@ SIMPLE_TEST_SOURCE = SimpleLoggerTest.cpp
 PERFORMANCE_SOURCE = PerformanceTest.cpp
 STRESS_SOURCE = StressTest.cpp
 EDGE_CASE_SOURCE = EdgeCaseTests.cpp
+MACRO_TEST_SOURCE = MacroTest.cpp
 
 # Executables
 EXAMPLE = example
@@ -22,9 +23,10 @@ SIMPLE_TEST_EXECUTABLE = simple_tests
 PERFORMANCE_EXECUTABLE = performance_tests
 STRESS_EXECUTABLE = stress_tests
 EDGE_CASE_EXECUTABLE = edge_case_tests
+MACRO_TEST_EXECUTABLE = macro_tests
 
 # Default target
-all: $(EXAMPLE) $(TEST_EXECUTABLE) $(SIMPLE_TEST_EXECUTABLE) $(PERFORMANCE_EXECUTABLE) $(STRESS_EXECUTABLE) $(EDGE_CASE_EXECUTABLE)
+all: $(EXAMPLE) $(TEST_EXECUTABLE) $(SIMPLE_TEST_EXECUTABLE) $(PERFORMANCE_EXECUTABLE) $(STRESS_EXECUTABLE) $(EDGE_CASE_EXECUTABLE) $(MACRO_TEST_EXECUTABLE)
 
 # Build main example
 $(EXAMPLE): $(EXAMPLE_SOURCE)
@@ -68,6 +70,13 @@ $(EDGE_CASE_EXECUTABLE): $(EDGE_CASE_SOURCE)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $< $(LIBS) -lgtest -lgtest_main
 	@echo "✅ Edge case tests built successfully!"
 
+# Build macro tests
+$(MACRO_TEST_EXECUTABLE): $(MACRO_TEST_SOURCE)
+	@echo "🔧 Building macro tests..."
+	@echo "Using compiler: $(CXX) with flags: $(CXXFLAGS)"
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $< $(LIBS) -lgtest -lgtest_main
+	@echo "✅ Macro tests built successfully!"
+
 # Test targets
 test: $(TEST_EXECUTABLE)
 	@echo "🧪 Running unit tests..."
@@ -91,7 +100,7 @@ edge-case-tests: $(EDGE_CASE_EXECUTABLE)
 	./$(EDGE_CASE_EXECUTABLE)
 
 # Run all tests
-enterprise-test: $(SIMPLE_TEST_EXECUTABLE) $(TEST_EXECUTABLE) $(PERFORMANCE_EXECUTABLE) $(STRESS_EXECUTABLE) $(EDGE_CASE_EXECUTABLE)
+enterprise-test: $(SIMPLE_TEST_EXECUTABLE) $(TEST_EXECUTABLE) $(PERFORMANCE_EXECUTABLE) $(STRESS_EXECUTABLE) $(EDGE_CASE_EXECUTABLE) $(MACRO_TEST_EXECUTABLE)
 	@echo "🏢 Running enterprise-grade test suite..."
 	@echo ""
 	@echo "=== BASIC FUNCTIONALITY ==="
@@ -109,12 +118,15 @@ enterprise-test: $(SIMPLE_TEST_EXECUTABLE) $(TEST_EXECUTABLE) $(PERFORMANCE_EXEC
 	@echo "=== EDGE CASES AND BOUNDARY CONDITIONS ==="
 	./$(EDGE_CASE_EXECUTABLE)
 	@echo ""
+	@echo "=== MACRO TESTS ==="
+	./$(MACRO_TEST_EXECUTABLE)
+	@echo ""
 	@echo "🏆 Enterprise-grade test suite completed!"
 
 # Clean build artifacts
 clean:
 	@echo "🧹 Cleaning build artifacts..."
-	rm -f $(EXAMPLE) $(TEST_EXECUTABLE) $(SIMPLE_TEST_EXECUTABLE) $(PERFORMANCE_EXECUTABLE) $(STRESS_EXECUTABLE) $(EDGE_CASE_EXECUTABLE)
+	rm -f $(EXAMPLE) $(TEST_EXECUTABLE) $(SIMPLE_TEST_EXECUTABLE) $(PERFORMANCE_EXECUTABLE) $(STRESS_EXECUTABLE) $(EDGE_CASE_EXECUTABLE) $(MACRO_TEST_EXECUTABLE)
 	rm -rf bin/ logs/ test_logs/ stress_logs/ stress_temp/ edge_test_logs/
 	@echo "✅ Cleaned build artifacts"
 

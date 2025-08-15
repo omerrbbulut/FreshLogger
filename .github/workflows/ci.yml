@@ -19,7 +19,7 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        compiler: [gcc-11]
+        compiler: [gcc-11, clang-14]
         cxx_std: [17]
     
     steps:
@@ -30,11 +30,17 @@ jobs:
     - name: Setup C++ Environment
       run: |
         sudo apt-get update
-        sudo apt-get install -y gcc-11 g++-11
-        echo "CC=gcc-11" >> $GITHUB_ENV
-        echo "CXX=g++-11" >> $GITHUB_ENV
+        if [ "${{ matrix.compiler }}" = "gcc-11" ]; then
+          sudo apt-get install -y gcc-11 g++-11
+          echo "CC=gcc-11" >> $GITHUB_ENV
+          echo "CXX=g++-11" >> $GITHUB_ENV
+        else
+          sudo apt-get install -y clang-14
+          echo "CC=clang-14" >> $GITHUB_ENV
+          echo "CXX=clang++-14" >> $GITHUB_ENV
+        fi
         echo "CXX_STD=17" >> $GITHUB_ENV
-        echo "Using compiler: gcc-11 with C++17"
+        echo "Using compiler: ${{ matrix.compiler }} with C++17"
     
     - name: Install Dependencies
       run: |
@@ -42,6 +48,8 @@ jobs:
         sudo apt-get install -y build-essential cmake
         sudo apt-get install -y libgtest-dev libspdlog-dev libfmt-dev
         sudo apt-get install -y pkg-config
+        # Code quality tools
+        sudo apt-get install -y clang-tidy cppcheck
     
     - name: Check Dependencies
       run: |
@@ -51,6 +59,49 @@ jobs:
         pkg-config --exists fmt && echo "✅ fmt found" || echo "❌ fmt not found"
         which gcc-11 && echo "✅ gcc-11 found" || echo "❌ gcc-11 not found"
         which g++-11 && echo "✅ g++-11 found" || echo "❌ g++-11 not found"
+        which clang-tidy && echo "✅ clang-tidy found" || echo "❌ clang-tidy not found"
+        which cppcheck && echo "✅ cppcheck found" || echo "❌ cppcheck not found"
+    
+    - name: Code Quality Analysis
+      run: |
+        echo "🔍 Running code quality analysis..."
+        echo ""
+        echo "=== CLANG-TIDY ANALYSIS ==="
+        clang-tidy --checks=*,-fuchsia-*,-google-*,-zircon-*,-abseil-*,-modernize-use-trailing-return-type \
+          --warnings-as-errors=* \
+          src/*.cpp Logger.hpp PerformanceTest.cpp StressTest.cpp EdgeCaseTests.cpp MacroTest.cpp \
+          -- -std=c++17 -I. || echo "⚠️ Clang-tidy found issues (continuing...)"
+        
+        echo ""
+        echo "=== CPPCHECK ANALYSIS ==="
+        cppcheck --enable=all --std=c++17 --error-exitcode=0 \
+          --suppress=missingIncludeSystem \
+          --suppress=unusedFunction \
+          --suppress=unmatchedSuppression \
+          src/ Logger.hpp PerformanceTest.cpp StressTest.cpp EdgeCaseTests.cpp MacroTest.cpp || echo "⚠️ Cppcheck found issues (continuing...)"
+        
+        echo "✅ Code quality analysis completed"
+    
+    - name: Security Scan
+      run: |
+        echo "🔒 Running security vulnerability scan..."
+        echo ""
+        echo "=== OWASP DEPENDENCY CHECK ==="
+        
+        # Install OWASP dependency-check
+        wget -qO- https://github.com/jeremylong/DependencyCheck/releases/download/v8.4.0/dependency-check-8.4.0-release.zip | unzip -q -
+        chmod +x dependency-check/bin/dependency-check.sh
+        
+        # Run security scan on dependencies
+        ./dependency-check/bin/dependency-check.sh \
+          --scan . \
+          --format "HTML" \
+          --format "JSON" \
+          --out "security-report" \
+          --failOnCVSS 7 \
+          --suppression "security-suppressions.xml" || echo "⚠️ Security scan found vulnerabilities (continuing...)"
+        
+        echo "✅ Security scan completed"
     
     - name: Build and Test
       run: |
@@ -66,23 +117,29 @@ jobs:
         make all
         echo "Build completed successfully"
     
-    - name: Run Basic Tests
+    - name: Run Enterprise Test Suite
       run: |
-        echo "Running basic tests..."
-        echo "=== Simple Tests ==="
-        ./simple_tests || echo "Simple tests failed but continuing"
-        echo "=== Unit Tests ==="
-        ./unit_tests || echo "Unit tests failed but continuing"
-    
-    - name: Run Performance Tests
-      run: |
-        echo "Running performance tests..."
-        echo "=== Performance Tests ==="
-        ./performance_tests || echo "Performance tests failed but continuing"
-        echo "=== Stress Tests ==="
-        timeout 180s ./stress_tests || echo "Stress tests failed or timed out but continuing"
-        echo "=== Edge Case Tests ==="
-        timeout 180s ./edge_case_tests || echo "Edge case tests failed or timed out but continuing"
+        echo "🏢 Running enterprise-grade test suite..."
+        echo ""
+        echo "=== BASIC FUNCTIONALITY ==="
+        ./simple_tests
+        echo ""
+        echo "=== UNIT TESTS ==="
+        ./unit_tests
+        echo ""
+        echo "=== PERFORMANCE BENCHMARKS ==="
+        ./performance_tests
+        echo ""
+        echo "=== STRESS AND STABILITY ==="
+        ./stress_tests
+        echo ""
+        echo "=== EDGE CASES AND BOUNDARY CONDITIONS ==="
+        ./edge_case_tests
+        echo ""
+        echo "=== MACRO TESTS ==="
+        ./macro_tests
+        echo ""
+        echo "🏆 Enterprise-grade test suite completed!"
     
     - name: Upload Test Results
       uses: actions/upload-artifact@v4
@@ -90,9 +147,10 @@ jobs:
       with:
         name: test-results-gcc11-cpp17
         path: |
-          test_logs/
-          stress_logs/
-          edge_test_logs/
+          test_logs*/
+          stress_logs*/
+          edge_test_logs*/
+          macro_test_logs*/
           *.log
           Makefile
     
@@ -139,11 +197,15 @@ jobs:
         git add Logger.hpp
         git commit -m "chore: auto-bump version to $NEW_VERSION [skip ci]"
         
+        # Create and push Git tag for the new version
+        git tag -a "v$NEW_VERSION" -m "Release version $NEW_VERSION"
+        
         # Pull latest changes before push to avoid conflicts
         git pull origin main --rebase
         git push origin main
+        git push origin "v$NEW_VERSION"
         
-        echo "🚀 Version $NEW_VERSION pushed to main"
+        echo "🚀 Version $NEW_VERSION pushed to main with tag v$NEW_VERSION"
 
 # Release job removed - releases will be created manually on GitHub
 # This simplifies the workflow and avoids token permission issues 

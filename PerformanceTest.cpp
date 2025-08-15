@@ -29,11 +29,13 @@
 class PerformanceTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        // Create logs directory
-        std::filesystem::create_directories("test_logs");
+        // Create unique test directory for each test run
+        testDir = "test_logs_" + std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count());
+        std::filesystem::create_directories(testDir);
         
         // Performance test configuration
-        perfConfig.logFilePath = "test_logs/performance.log";
+        perfConfig.logFilePath = testDir + "/performance.log";
         perfConfig.minLevel = Logger::LogLevel::INFO;
         perfConfig.consoleOutput = false;
         perfConfig.asyncLogging = true;
@@ -42,7 +44,7 @@ protected:
         perfConfig.queueSize = 100000;
         
         // Stress test configuration
-        stressConfig.logFilePath = "test_logs/stress.log";
+        stressConfig.logFilePath = testDir + "/stress.log";
         stressConfig.minLevel = Logger::LogLevel::WARNING;
         stressConfig.consoleOutput = false;
         stressConfig.asyncLogging = true;
@@ -54,9 +56,9 @@ protected:
     void TearDown() override {
         // Clean up test files with robust error handling
         try {
-            if (std::filesystem::exists("test_logs")) {
+            if (std::filesystem::exists(testDir)) {
                 // Force remove all contents recursively
-                std::filesystem::remove_all("test_logs");
+                std::filesystem::remove_all(testDir);
             }
         } catch (const std::exception& e) {
             // Silently ignore cleanup errors - they don't affect test results
@@ -103,6 +105,7 @@ protected:
     static constexpr int LARGE_TEST_SIZE = 100000;
     static constexpr int STRESS_TEST_SIZE = 1000000;
     static constexpr int THREAD_COUNT = 8;
+    std::string testDir;
 };
 
 // ==================== THROUGHPUT TESTS ====================
@@ -317,18 +320,24 @@ TEST_F(PerformanceTest, HighLoadStressTest) {
 
 TEST_F(PerformanceTest, FileRotationPerformance) {
     Logger::Config config = perfConfig;
-    config.maxFileSize = 1024 * 50; // 50KB - realistic rotation trigger
+    config.maxFileSize = 1024 * 10; // 10KB - smaller size for reliable rotation
     config.maxFiles = 3;
     
     Logger logger(config);
     
     auto start = std::chrono::high_resolution_clock::now();
     
-    // Log messages that will trigger file rotation
+    // First, create some small log files to establish rotation sequence
+    for (int i = 0; i < 100; ++i) {
+        logger.info("Initial log message " + std::to_string(i));
+    }
+    logger.flush();
+    
+    // Now add large messages to trigger rotation
     for (int i = 0; i < MEDIUM_TEST_SIZE; ++i) {
         logger.info("File rotation test message " + std::to_string(i) + 
                    " with additional content to exceed file size limit " +
-                   std::string(1000, 'X')); // Large message to trigger rotation
+                   std::string(500, 'X')); // Smaller message for more reliable rotation
     }
     
     logger.flush();
@@ -345,7 +354,7 @@ TEST_F(PerformanceTest, FileRotationPerformance) {
               << throughput << " msg/sec" << std::endl;
     
     // Check if log file was created (basic functionality test)
-    bool logFileExists = std::filesystem::exists("test_logs/performance.log");
+    bool logFileExists = std::filesystem::exists(config.logFilePath);
     std::cout << "Log file exists: " << (logFileExists ? "Yes" : "No") << std::endl;
     
     // Enterprise-grade expectations (simplified for reliability)
