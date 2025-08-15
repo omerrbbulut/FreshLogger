@@ -1,0 +1,10 @@
+# Code owners for FreshLogger
+# This file defines who is responsible for code in this repository
+
+# Global code owner - Ömer Bulut
+* @omerrbbulut
+
+# Specific file ownership (if needed)
+# src/ @omerrbbulut
+# tests/ @omerrbbulut
+# docs/ @omerrbbulut 
