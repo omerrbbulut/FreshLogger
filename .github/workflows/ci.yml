@@ -126,11 +126,12 @@ jobs:
         sed -i "s/Version:.*[0-9]\+\.[0-9]\+\.[0-9]\+/Version: $NEW_VERSION/" Logger.hpp
         echo "✅ Version updated to $NEW_VERSION"
         
-        # Commit and push
+        # Commit and push with PAT token
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add Logger.hpp
         git commit -m "chore: auto-bump version to $NEW_VERSION [skip ci]"
+        git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/omerrbbulut/FreshLogger.git
         git push origin main
         
         echo "🚀 Version $NEW_VERSION pushed to main"
