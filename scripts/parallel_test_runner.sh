@@ -31,7 +31,7 @@ TEST_SUITES=(
 )
 
 # Create directories
-mkdir -p "$REPORT_DIR" "$LOG_DIR"
+mkdir -p "$REPORT_DIR" "$LOG_DIR" "test_logs"
 
 echo -e "${BLUE}🚀 FreshLogger Parallel Test Runner${NC}"
 echo -e "${BLUE}================================${NC}"

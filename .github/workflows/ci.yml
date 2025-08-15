@@ -106,10 +106,21 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y ${{ matrix.compiler }} libspdlog-dev libfmt-dev libgtest-dev
     
+    - name: Setup Compiler
+      run: |
+        echo "🔧 Setting up ${{ matrix.compiler }}..."
+        if [ "${{ matrix.compiler }}" = "gcc-11" ]; then
+          echo "CXX=g++-11" >> $GITHUB_ENV
+          echo "CC=gcc-11" >> $GITHUB_ENV
+        else
+          echo "CXX=clang++-14" >> $GITHUB_ENV
+          echo "CC=clang-14" >> $GITHUB_ENV
+        fi
+        echo "Using compiler: $CXX"
+    
     - name: Build with ${{ matrix.compiler }}
       run: |
         echo "🔨 Building with ${{ matrix.compiler }}..."
-        export CXX=${{ matrix.compiler }}
         make clean
         make all
         
@@ -118,7 +129,7 @@ jobs:
     - name: Run Tests with ${{ matrix.compiler }}
       run: |
         echo "🧪 Running tests with ${{ matrix.compiler }}..."
-        export CXX=${{ matrix.compiler }}
+        mkdir -p test_logs
         make enterprise-test
         
         echo "✅ Tests completed with ${{ matrix.compiler }}"
@@ -128,7 +139,7 @@ jobs:
       if: always()
       with:
         name: test-results-${{ matrix.compiler }}
-        path: test_logs*/
+        path: test_logs/
         retention-days: 30
 
   # Phase 2: Parallel Testing & Performance
@@ -170,6 +181,7 @@ jobs:
       run: |
         echo "🚀 Running parallel test suite..."
         chmod +x scripts/parallel_test_runner.sh
+        mkdir -p parallel_test_reports parallel_test_logs
         TIMEOUT_SECONDS=120 MAX_PARALLEL_JOBS=4 ./scripts/parallel_test_runner.sh || echo "⚠️ Some tests failed or timed out (continuing...)"
         
         echo "✅ Parallel test execution completed"
@@ -185,6 +197,7 @@ jobs:
       run: |
         echo "🔍 Running performance regression detection..."
         chmod +x scripts/performance_regression_detector.sh
+        mkdir -p current_performance performance_baselines
         
         # Create baseline if none exists
         if [ ! -d "performance_baselines" ] || [ -z "$(ls -A performance_baselines 2>/dev/null)" ]; then

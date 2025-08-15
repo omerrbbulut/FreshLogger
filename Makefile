@@ -90,6 +90,7 @@ $(MACRO_TEST_EXECUTABLE): $(MACRO_TEST_SOURCE)
 enterprise-test: all
 	@echo "🚀 Running Enterprise Test Suite..."
 	@echo "=================================="
+	@mkdir -p test_logs
 	@echo ""
 	@echo "🧪 Unit Tests:"
 	./$(UNIT_TEST_EXECUTABLE) --gtest_output=xml:test_logs/unit_results.xml

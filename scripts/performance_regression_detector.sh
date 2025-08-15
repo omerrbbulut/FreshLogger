@@ -47,7 +47,7 @@ log() {
 run_performance_tests() {
     log "INFO" "Running performance tests..."
     
-    mkdir -p "$CURRENT_RESULTS_DIR"
+    mkdir -p "$CURRENT_RESULTS_DIR" "test_logs" "stress_logs" "edge_test_logs"
     
     # Run performance test suite
     if [[ -f "performance_tests" ]]; then
