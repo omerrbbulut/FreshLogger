@@ -3,13 +3,19 @@
 
 # Compiler and flags (can be overridden by environment)
 CXX ?= clang++
-CXXFLAGS ?= -std=c++17 -Wall -Wextra -O2 -g -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic \
+CXXFLAGS ?= -std=c++17 -Wall -Wextra -O2 -g
+CLANG_FLAGS = -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic \
 	-Wno-global-constructors -Wno-exit-time-destructors \
 	-Wno-padded -Wno-covered-switch-default \
 	-Wno-unused-exception-parameter -Wno-unused-lambda-capture \
 	-Wno-unsafe-buffer-usage -Wno-sign-conversion -Wno-newline-eof
 INCLUDES = -I.
 LIBS = -lspdlog -lfmt -lpthread
+
+# Detect compiler and set appropriate flags
+ifeq ($(findstring clang,$(CXX)),clang)
+    CXXFLAGS += $(CLANG_FLAGS)
+endif
 
 # Source files
 SOURCES = example.cpp
