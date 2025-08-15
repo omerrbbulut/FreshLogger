@@ -7,7 +7,6 @@ on:
     branches: [ main ]
   release:
     types: [ published ]
-  workflow_dispatch:
 
 jobs:
   test:
@@ -89,107 +88,52 @@ jobs:
           edge_test_logs/
           *.log
           Makefile
-
-  release:
-    needs: test
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
     
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup C++ Environment
+    - name: Auto Version Bump
+      if: github.actor == 'omerrbbulut' && success()
       run: |
-        sudo apt-get update
-        sudo apt-get install -y gcc-11 g++-11
-        echo "CC=gcc-11" >> $GITHUB_ENV
-        echo "CXX=g++-11" >> $GITHUB_ENV
-        echo "CXX_STD=17" >> $GITHUB_ENV
-    
-    - name: Install Dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential cmake
-        sudo apt-get install -y libgtest-dev libspdlog-dev libfmt-dev
-        sudo apt-get install -y pkg-config
-    
-    - name: Build Release
-      run: |
-        export CXXFLAGS="-std=c++17 -Wall -Wextra -O2 -g"
-        make clean || true
-        make all
-        echo "Release build completed"
-    
-    - name: Run Critical Tests
-      run: |
-        echo "Running critical tests for release..."
-        ./simple_tests
-        ./unit_tests
-        timeout 240s ./performance_tests || echo "Performance tests failed but continuing"
-    
-    - name: Create Release Package
-      run: |
-        # Get current version from Logger.hpp
-        CURRENT_VERSION=$(grep -o 'Version:.*[0-9]\+\.[0-9]\+\.[0-9]\+' Logger.hpp | head -1 | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+' || echo "1.1.0")
-        echo "Creating release package for version: $CURRENT_VERSION"
+        echo "🔍 Analyzing commit message for version bump..."
         
-        mkdir -p release
-        cp Logger.hpp release/
-        cp README.md release/
-        cp LICENSE release/
-        cp example.cpp release/
-        cp -r .github/ release/ 2>/dev/null || true
-        tar -czf FreshLogger-v$CURRENT_VERSION.tar.gz release/
-        echo "Release package created: FreshLogger-v$CURRENT_VERSION.tar.gz"
-    
-    - name: Create GitHub Release
-      if: github.event_name == 'workflow_dispatch'
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: v${{ steps.get_version.outputs.version }}
-        release_name: FreshLogger v${{ steps.get_version.outputs.version }}
-        body: |
-          ## What's New in v${{ steps.get_version.outputs.version }}
-          
-          ### 🚀 Major Improvements
-          - CI/CD Pipeline Stabilization
-          - Test Suite Optimization
-          - File Rotation Handling
-          - Performance Optimizations
-          
-          ### 🔧 Bug Fixes
-          - Fixed unit test segfault
-          - Resolved file rotation warnings
-          - Cleaned up console output
-          
-          ### 📚 Documentation
-          - Technical analysis document
-          - Performance guidelines
-          - Production best practices
-          
-          ---
-          **Author**: Ömer Bulut  
-          **Build**: Stable and Production Ready
-        draft: false
-        prerelease: false
-    
-    - name: Get Version
-      id: get_version
-      run: |
+        # Get current version
         CURRENT_VERSION=$(grep -o 'Version:.*[0-9]\+\.[0-9]\+\.[0-9]\+' Logger.hpp | head -1 | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+' || echo "1.1.0")
-        echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
-    
-    - name: Upload Release Assets
-      if: github.event_name == 'workflow_dispatch'
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./FreshLogger-v${{ steps.get_version.outputs.version }}.tar.gz
-        asset_name: FreshLogger-v${{ steps.get_version.outputs.version }}.tar.gz
-        asset_content_type: application/gzip 
+        echo "Current version: $CURRENT_VERSION"
+        
+        # Parse version components
+        IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+        
+        # Analyze commit message
+        COMMIT_MSG="${{ github.event.head_commit.message }}"
+        echo "Commit message: $COMMIT_MSG"
+        
+        if [[ "$COMMIT_MSG" == *"BREAKING CHANGE"* ]]; then
+          NEW_MAJOR=$((MAJOR + 1))
+          NEW_VERSION="$NEW_MAJOR.0.0"
+          echo "🚨 BREAKING CHANGE detected - bumping to $NEW_VERSION"
+        elif [[ "$COMMIT_MSG" == *"feat:"* ]]; then
+          NEW_MINOR=$((MINOR + 1))
+          NEW_VERSION="$MAJOR.$NEW_MINOR.0"
+          echo "✨ Feature detected - bumping to $NEW_VERSION"
+        elif [[ "$COMMIT_MSG" == *"fix:"* ]]; then
+          NEW_PATCH=$((PATCH + 1))
+          NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH"
+          echo "🔧 Fix detected - bumping to $NEW_VERSION"
+        else
+          echo "📝 No version bump needed"
+          exit 0
+        fi
+        
+        # Update Logger.hpp
+        sed -i "s/Version:.*[0-9]\+\.[0-9]\+\.[0-9]\+/Version: $NEW_VERSION/" Logger.hpp
+        echo "✅ Version updated to $NEW_VERSION"
+        
+        # Commit and push
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add Logger.hpp
+        git commit -m "chore: auto-bump version to $NEW_VERSION [skip ci]"
+        git push origin main
+        
+        echo "🚀 Version $NEW_VERSION pushed to main"
+
+# Release job removed - releases will be created manually on GitHub
+# This simplifies the workflow and avoids token permission issues 
