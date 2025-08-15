@@ -130,21 +130,66 @@ jobs:
     
     - name: Create Release Package
       run: |
+        # Get current version from Logger.hpp
+        CURRENT_VERSION=$(grep -o 'Version:.*[0-9]\+\.[0-9]\+\.[0-9]\+' Logger.hpp | head -1 | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+' || echo "1.1.0")
+        echo "Creating release package for version: $CURRENT_VERSION"
+        
         mkdir -p release
         cp Logger.hpp release/
         cp README.md release/
         cp LICENSE release/
         cp example.cpp release/
         cp -r .github/ release/ 2>/dev/null || true
-        tar -czf FreshLogger-${{ github.event.release.tag_name }}.tar.gz release/
-        echo "Release package created: FreshLogger-${{ github.event.release.tag_name }}.tar.gz"
+        tar -czf FreshLogger-v$CURRENT_VERSION.tar.gz release/
+        echo "Release package created: FreshLogger-v$CURRENT_VERSION.tar.gz"
+    
+    - name: Create GitHub Release
+      if: github.event_name == 'workflow_dispatch'
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ steps.get_version.outputs.version }}
+        release_name: FreshLogger v${{ steps.get_version.outputs.version }}
+        body: |
+          ## What's New in v${{ steps.get_version.outputs.version }}
+          
+          ### 🚀 Major Improvements
+          - CI/CD Pipeline Stabilization
+          - Test Suite Optimization
+          - File Rotation Handling
+          - Performance Optimizations
+          
+          ### 🔧 Bug Fixes
+          - Fixed unit test segfault
+          - Resolved file rotation warnings
+          - Cleaned up console output
+          
+          ### 📚 Documentation
+          - Technical analysis document
+          - Performance guidelines
+          - Production best practices
+          
+          ---
+          **Author**: Ömer Bulut  
+          **Build**: Stable and Production Ready
+        draft: false
+        prerelease: false
+    
+    - name: Get Version
+      id: get_version
+      run: |
+        CURRENT_VERSION=$(grep -o 'Version:.*[0-9]\+\.[0-9]\+\.[0-9]\+' Logger.hpp | head -1 | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+' || echo "1.1.0")
+        echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
     
     - name: Upload Release Assets
+      if: github.event_name == 'workflow_dispatch'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./FreshLogger-${{ github.event.release.tag_name }}.tar.gz
-        asset_name: FreshLogger-${{ github.event.release.tag_name }}.tar.gz
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./FreshLogger-v${{ steps.get_version.outputs.version }}.tar.gz
+        asset_name: FreshLogger-v${{ steps.get_version.outputs.version }}.tar.gz
         asset_content_type: application/gzip 
