@@ -1,7 +1,7 @@
 /**
  * @brief Header-only modern thread-safe logger using spdlog library
  * @author Ömer Bulut
- * Version: 1.1.4
+ * Version: 1.1.5
  * 
  * Features:
  * - Thread-safe logging
