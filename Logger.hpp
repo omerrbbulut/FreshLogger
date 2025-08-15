@@ -323,4 +323,4 @@ private:
 #define LOG_INFO(msg) logger.info(msg)
 #define LOG_WARNING(msg) logger.warning(msg)
 #define LOG_ERROR(msg) logger.error(msg)
-#define LOG_FATAL(msg) logger.fatal(msg) 
+#define LOG_FATAL(msg) logger.fatal(msg) // Test comment for workflow
