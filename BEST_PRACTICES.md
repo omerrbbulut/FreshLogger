@@ -1,7 +1,7 @@
 # 🏆 FreshLogger Best Practices Guide
 
 **Author:** Ömer Bulut  
-**Version:** 1.2.0  
+**Version:** 1.3.0  
 **Last Updated:** August 16, 2025
 
 ---
