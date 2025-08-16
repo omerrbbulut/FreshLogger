@@ -350,7 +350,7 @@ jobs:
         echo "🔍 Analyzing commit message for version bump..."
         
         # Get current version
-        CURRENT_VERSION=$(grep -o 'VERSION = "[^"]*"' config.json | cut -d'"' -f2)
+        CURRENT_VERSION=$(grep -o '"VERSION": "[^"]*"' config.json | cut -d'"' -f4)
         echo "Current version: $CURRENT_VERSION"
         
         # Get commit message
@@ -375,7 +375,7 @@ jobs:
         echo "✅ Version updated to $NEW_VERSION"
         
         # Update version in config.json
-        sed -i "s/VERSION = \"$CURRENT_VERSION\"/VERSION = \"$NEW_VERSION\"/" config.json
+        sed -i "s/\"VERSION\": \"$CURRENT_VERSION\"/\"VERSION\": \"$NEW_VERSION\"/" config.json
         
         # Commit and push
         git add config.json
