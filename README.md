@@ -1,5 +1,12 @@
 # 🚀 FreshLogger - Enterprise-Grade C++ Logging Library
 
+[![CI/CD Pipeline](https://github.com/omerrbbulut/FreshLogger/workflows/FreshLogger%20CI%2FCD%20Pipeline/badge.svg)](https://github.com/omerrbbulut/FreshLogger/actions)
+[![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](https://github.com/omerrbbulut/FreshLogger/releases)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![C++](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://isocpp.org/)
+[![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS-blue.svg)](https://github.com/omerrbbulut/FreshLogger)
+[![Tests](https://img.shields.io/badge/tests-100%25%20passing-brightgreen.svg)](https://github.com/omerrbbulut/FreshLogger/actions)
+
 A high-performance, feature-rich C++ logging library with comprehensive CI/CD pipeline and enterprise-grade testing.
 
 ## ✨ Features
@@ -35,6 +42,34 @@ A high-performance, feature-rich C++ logging library with comprehensive CI/CD pi
 - 🔄 **Cross-Platform Testing**: Windows, macOS support
 - 🔄 **Integration Tests**: Real-world scenario testing
 - 🔄 **Load Testing**: High concurrency testing
+
+## ⚡ Quick Start
+
+### 🚀 One-Liner Installation
+```bash
+# Clone and run in one command
+git clone https://github.com/omerrbbulut/FreshLogger.git && cd FreshLogger && make all && make enterprise-test
+```
+
+### 📦 Docker Support (Coming Soon)
+```bash
+# Docker image will be available soon
+docker pull omerrbbulut/freshlogger:latest
+```
+
+### 🎯 Live Demo
+```cpp
+#include "Logger.hpp"
+
+int main() {
+    Logger logger;
+    logger.info("🚀 FreshLogger is running!");
+    logger.debug("Debug mode enabled");
+    logger.warning("This is a warning");
+    logger.error("This is an error");
+    return 0;
+}
+```
 
 ## 📦 Installation
 
