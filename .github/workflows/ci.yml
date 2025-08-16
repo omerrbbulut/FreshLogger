@@ -374,6 +374,9 @@ jobs:
         
         echo "✅ Version updated to $NEW_VERSION"
         
+        # Export NEW_VERSION for GitHub Actions
+        echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+        
         # Update version in config.json
         sed -i "s/\"VERSION\": \"$CURRENT_VERSION\"/\"VERSION\": \"$NEW_VERSION\"/" config.json
         
@@ -387,15 +390,19 @@ jobs:
         # Push changes
         git push origin main
         
-        # Create and push tag
-        git tag -a "v$NEW_VERSION" -m "Release version $NEW_VERSION"
-        git push origin "v$NEW_VERSION"
-        
-        echo "🚀 Version $NEW_VERSION pushed to main with tag v$NEW_VERSION"
+        # Check if tag already exists
+        if git ls-remote --tags origin | grep -q "v$NEW_VERSION"; then
+          echo "⚠️ Tag v$NEW_VERSION already exists, skipping tag creation"
+        else
+          # Create and push tag
+          git tag -a "v$NEW_VERSION" -m "Release version $NEW_VERSION"
+          git push origin "v$NEW_VERSION"
+          echo "🚀 Version $NEW_VERSION pushed to main with tag v$NEW_VERSION"
+        fi
     
     - name: Create GitHub Release
       uses: actions/create-release@v1
-      if: success()
+      if: success() && env.NEW_VERSION != ''
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
