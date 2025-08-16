@@ -46,8 +46,8 @@ protected:
         memoryConfig.minLevel = Logger::LogLevel::INFO;
         memoryConfig.consoleOutput = false;
         memoryConfig.asyncLogging = true;
-        memoryConfig.maxFileSize = 1 * 1024 * 1024; // 1MB
-        memoryConfig.maxFiles = 50;
+        memoryConfig.maxFileSize = 10 * 1024 * 1024; // 10MB (increased from 1MB)
+        memoryConfig.maxFiles = 10; // Reduced from 50 to prevent rapid rotation
         memoryConfig.queueSize = 2000000;
         
         // CPU stress configuration
@@ -290,7 +290,7 @@ TEST_F(StressTest, MemoryPressureTest) {
             for (int i = 0; i < 100000; ++i) { // Reduced from 1M to 100K per thread
                 try {
                     // Generate large messages to stress memory
-                    size_t messageSize = 1000 + static_cast<size_t>(i % 500); // Reduced from 10KB to 1-1.5KB
+                    size_t messageSize = 5000 + static_cast<size_t>(i % 5000); // Increased from 1-1.5KB to 5-10KB
                     std::string message = "Memory pressure test - Thread " + std::to_string(t) + 
                                         " - Message " + std::to_string(i) + " - " +
                                         generateRandomMessage(messageSize);
@@ -346,7 +346,7 @@ TEST_F(StressTest, MemoryPressureTest) {
     
     // Enterprise-grade expectations (adjusted for realistic testing)
     EXPECT_GT(successCount.load(), 300000) << "Should handle > 300K messages under memory pressure";
-    EXPECT_LT(memoryIncrease, 150000) << "Memory increase should be < 150MB (realistic for 400K messages)";
+    EXPECT_LT(memoryIncrease, 500000) << "Memory increase should be < 500MB (realistic for 400K large messages)";
     EXPECT_GT(finalMemory.available, 50000) << "Should maintain > 50MB available memory";
 }
 
