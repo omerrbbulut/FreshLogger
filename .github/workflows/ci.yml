@@ -89,65 +89,95 @@ jobs:
         path: security-report/
         retention-days: 30
 
-  # Phase 1: Cross-Compiler Testing
+  # Phase 2: Cross-Compiler Testing
   cross-compiler:
-    name: Cross-Compiler Testing
+    name: Cross-Compiler Testing (gcc-11)
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        compiler: [gcc-11, clang-14]
-      fail-fast: false
-    timeout-minutes: 20
+    timeout-minutes: 15
+    env:
+      CXX: g++-11
+      CXXFLAGS: -std=c++17 -Wall -Wextra -O2 -g
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
     
     - name: Install Dependencies
       run: |
-        echo "🔧 Installing dependencies for ${{ matrix.compiler }}..."
+        echo "🔧 Installing dependencies..."
         sudo apt-get update
-        if [ "${{ matrix.compiler }}" = "gcc-11" ]; then
-          sudo apt-get install -y gcc-11 g++-11 libspdlog-dev libfmt-dev libgtest-dev || echo "⚠️ Some packages could not be installed (continuing...)"
-        else
-          sudo apt-get install -y clang-14 libspdlog-dev libfmt-dev libgtest-dev || echo "⚠️ Some packages could not be installed (continuing...)"
-        fi
+        sudo apt-get install -y build-essential libspdlog-dev libfmt-dev libgtest-dev gcc-11 g++-11 || echo "⚠️ Some packages could not be installed (continuing...)"
     
     - name: Setup Compiler
       run: |
-        echo "🔧 Setting up ${{ matrix.compiler }}..."
-        if [ "${{ matrix.compiler }}" = "gcc-11" ]; then
-          echo "CXX=g++-11" >> $GITHUB_ENV
-          echo "CC=gcc-11" >> $GITHUB_ENV
-        else
-          echo "CXX=clang++-14" >> $GITHUB_ENV
-          echo "CC=clang-14" >> $GITHUB_ENV
-        fi
+        echo "🔧 Setting up gcc-11..."
+        export CC=gcc-11
+        export CXX=g++-11
         echo "Using compiler: $CXX"
+        echo "Using flags: $CXXFLAGS"
     
-    - name: Build with ${{ matrix.compiler }}
+    - name: Build and Test
       run: |
-        echo "🔨 Building with ${{ matrix.compiler }}..."
+        echo "🔨 Building with gcc-11..."
         make clean
         make all
         
-        echo "✅ Build completed with ${{ matrix.compiler }}"
-    
-    - name: Run Tests with ${{ matrix.compiler }}
-      run: |
-        echo "🧪 Running tests with ${{ matrix.compiler }}..."
-        mkdir -p test_logs
+        echo "🧪 Running tests with gcc-11..."
         make enterprise-test
         
-        echo "✅ Tests completed with ${{ matrix.compiler }}"
+        echo "✅ gcc-11 build and tests completed"
     
     - name: Upload Test Results
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: test-results-${{ matrix.compiler }}
+        name: gcc-11-test-results
+        path: test_logs/
+        retention-days: 30
+
+  # Phase 2: Clang-14 Testing
+  clang-testing:
+    name: Cross-Compiler Testing (clang-14)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CXX: clang++-14
+      CXXFLAGS: -std=c++17 -Wall -Wextra -O2 -g
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Install Dependencies
+      run: |
+        echo "🔧 Installing dependencies..."
+        sudo apt-get update
+        sudo apt-get install -y build-essential libspdlog-dev libfmt-dev libgtest-dev clang-14 || echo "⚠️ Some packages could not be installed (continuing...)"
+    
+    - name: Setup Compiler
+      run: |
+        echo "🔧 Setting up clang-14..."
+        export CC=clang-14
+        export CXX=clang++-14
+        echo "Using compiler: $CXX"
+        echo "Using flags: $CXXFLAGS"
+    
+    - name: Build and Test
+      run: |
+        echo "🔨 Building with clang-14..."
+        make clean
+        make all
+        
+        echo "🧪 Running tests with clang-14..."
+        make enterprise-test
+        
+        echo "✅ clang-14 build and tests completed"
+    
+    - name: Upload Test Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: clang-14-test-results
         path: test_logs/
         retention-days: 30
 
